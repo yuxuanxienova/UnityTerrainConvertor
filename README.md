@@ -22,3 +22,7 @@ This project provides scripts for:
 ### Step3 Export The Combined Mesh
 - 3.0 Select the combined mesh generated
 - 3.1 In Menu bar click "Tools" -> "Export Selected to OBJ"
+
+### Demo 
+A mountain terrain mesh combined with a fence mesh
+![Demo Image](images/Demo.png)
