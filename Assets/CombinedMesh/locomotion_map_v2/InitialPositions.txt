@@ -1,3 +1,4 @@
 ﻿Object Positions Export
 =======================
-Object: init_point, Position: (1.6, 0.4, 0)
+Object: init_point1, Position: (1.6, 0.4, 0)
+Object: init_point2, Position: (-7.7, 1.8, 15.8)
