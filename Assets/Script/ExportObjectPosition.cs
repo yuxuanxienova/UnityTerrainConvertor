@@ -7,9 +7,10 @@ using System.Text;
 public class ExportObjectPositions : EditorWindow
 {
     private bool exportAllObjects = false;
+    private bool exportInROSCoordinateFrame = false;
     private string fileName = "ObjectPositions.txt";
 
-    [MenuItem("Window/Export Object Positions…")]
+    [MenuItem("Tools/Export Object Positions…")]
     static void Init()
     {
         ExportObjectPositions window = (ExportObjectPositions)GetWindow(typeof(ExportObjectPositions));
@@ -23,6 +24,9 @@ public class ExportObjectPositions : EditorWindow
 
         EditorGUILayout.Space();
         exportAllObjects = EditorGUILayout.Toggle("Export All Objects", exportAllObjects);
+
+        EditorGUILayout.Space();
+        exportInROSCoordinateFrame = EditorGUILayout.Toggle("Export In ROS Coordinate", exportInROSCoordinateFrame);
 
         EditorGUILayout.Space();
         fileName = EditorGUILayout.TextField("File Name", fileName);
@@ -79,6 +83,12 @@ public class ExportObjectPositions : EditorWindow
         foreach (GameObject go in objectsToExport)
         {
             Vector3 pos = go.transform.position;
+            if (exportInROSCoordinateFrame) 
+            {
+                pos = ExtensionMethods.VecUnity2Ros(pos);
+            }
+
+           
             sb.AppendLine($"Object: {go.name}, Position: ({pos.x}, {pos.y}, {pos.z})");
         }
 
