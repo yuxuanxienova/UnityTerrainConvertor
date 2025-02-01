@@ -29,7 +29,7 @@ from isaacgym import gymtorch, gymapi, gymutil
 import torch
 import os
 import time
-
+import threading
 #----------------------Node--------------------------
 
 class Node:
@@ -90,14 +90,23 @@ class Node:
         self.obs = obs
         self.dof_pos_RH = torch.zeros(1, 3, device="cuda")
         
+    def server_loop(self):
+        """Run the network server update in a separate thread."""
+        while True:
+            self.server.update()
+            # Optionally, add a tiny sleep to avoid a tight loop:
+            time.sleep(0.001)
+
     def run(self):
+        # Start the server thread
+        server_thread = threading.Thread(target=self.server_loop, daemon=True)
+        server_thread.start()
+        
+        # Main simulation loop
         while True:
             self.num_updates += 1
-            current_time = time.time()
-            #update client
             self.update_nav_gym()
-            if self.num_updates % 50 == 0:
-                self.server.update()
+            # You can add any simulation timing control here if needed.
     def update_nav_gym(self):
 
         action = self.policy(self.obs)
@@ -105,7 +114,7 @@ class Node:
 
         self.env.robot.dof_pos[:] = torch.zeros_like(self.env.robot.dof_pos)
         self.env.robot.dof_vel[:] = torch.zeros_like(self.env.robot.dof_vel)
-        self.env.robot.dof_pos[:,self.motion_loader.leg_idx_dict_rel["dof_pos_leg_hr"]] = self.dof_pos_RH 
+        self.env.robot.dof_pos[:,self.motion_loader.leg_idx_dict_rel["dof_pos_leg_hr"]] = torch.deg2rad(-1 *self.dof_pos_RH)
 
 
         self.env.robot.root_pos_w[:] = torch.zeros_like(self.env.robot.root_pos_w) + torch.tensor([0, 0, 1], device="cuda")
