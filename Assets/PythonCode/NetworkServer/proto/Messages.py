@@ -17,6 +17,7 @@ class MotionStateMsg(MsgBase):
     def __init__(self):
         super().__init__()
         self.protoName = "MotionStateMsg"
+        self.step = -1
         self.dof_pos_RH = []  
 #---------------Agent Message----------------
 class TransitionMsg(MsgBase):

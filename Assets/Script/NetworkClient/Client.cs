@@ -72,10 +72,11 @@ public class Client : MonoBehaviour
     }
 
     //-----------------------------------Publishers--------------------------------
-    public void CallPublishMotionState(float[] dof_pos_RH) 
+    public void CallPublishMotionState(int step,float[] dof_pos_RH) 
     {
         MotionStateMsg msg = new MotionStateMsg
         {
+            step = step,
             dof_pos_RH = dof_pos_RH
         };
         NetManager.Send(msg);

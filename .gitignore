@@ -73,3 +73,5 @@ crashlytics-build.properties
 
 #Additional Assets
 /[Aa]ssets/RPG_FPS_game_assets_industrial/
+
+*.vscode

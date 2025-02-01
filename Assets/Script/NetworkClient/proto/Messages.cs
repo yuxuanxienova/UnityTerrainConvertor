@@ -46,6 +46,7 @@ public class EpisodicRewardMsg : MsgBase
 public class MotionStateMsg : MsgBase
 {
     public MotionStateMsg() {  protoName = "MotionStateMsg"; }
+    public int step;
     public float[] dof_pos_RH;
 }
 //--------------Test Message----------
