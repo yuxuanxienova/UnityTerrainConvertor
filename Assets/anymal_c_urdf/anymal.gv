@@ -1,0 +1,236 @@
+digraph G {
+node [shape=box];
+"base" [label="base"];
+"LF_HAA" [label="LF_HAA"];
+"LF_HIP" [label="LF_HIP"];
+"LF_hip_fixed" [label="LF_hip_fixed"];
+"LF_HFE" [label="LF_HFE"];
+"LF_THIGH" [label="LF_THIGH"];
+"LF_thigh_fixed" [label="LF_thigh_fixed"];
+"LF_KFE" [label="LF_KFE"];
+"LF_SHANK" [label="LF_SHANK"];
+"LF_shank_fixed" [label="LF_shank_fixed"];
+"LF_FOOT" [label="LF_FOOT"];
+"LH_HAA" [label="LH_HAA"];
+"LH_HIP" [label="LH_HIP"];
+"LH_hip_fixed" [label="LH_hip_fixed"];
+"LH_HFE" [label="LH_HFE"];
+"LH_THIGH" [label="LH_THIGH"];
+"LH_thigh_fixed" [label="LH_thigh_fixed"];
+"LH_KFE" [label="LH_KFE"];
+"LH_SHANK" [label="LH_SHANK"];
+"LH_shank_fixed" [label="LH_shank_fixed"];
+"LH_FOOT" [label="LH_FOOT"];
+"RF_HAA" [label="RF_HAA"];
+"RF_HIP" [label="RF_HIP"];
+"RF_hip_fixed" [label="RF_hip_fixed"];
+"RF_HFE" [label="RF_HFE"];
+"RF_THIGH" [label="RF_THIGH"];
+"RF_thigh_fixed" [label="RF_thigh_fixed"];
+"RF_KFE" [label="RF_KFE"];
+"RF_SHANK" [label="RF_SHANK"];
+"RF_shank_fixed" [label="RF_shank_fixed"];
+"RF_FOOT" [label="RF_FOOT"];
+"RH_HAA" [label="RH_HAA"];
+"RH_HIP" [label="RH_HIP"];
+"RH_hip_fixed" [label="RH_hip_fixed"];
+"RH_HFE" [label="RH_HFE"];
+"RH_THIGH" [label="RH_THIGH"];
+"RH_thigh_fixed" [label="RH_thigh_fixed"];
+"RH_KFE" [label="RH_KFE"];
+"RH_SHANK" [label="RH_SHANK"];
+"RH_shank_fixed" [label="RH_shank_fixed"];
+"RH_FOOT" [label="RH_FOOT"];
+"battery" [label="battery"];
+"bottom_shell" [label="bottom_shell"];
+"face_front" [label="face_front"];
+"depth_camera_front_camera" [label="depth_camera_front_camera"];
+"depth_camera_front_camera_parent" [label="depth_camera_front_camera_parent"];
+"depth_camera_front_color_frame" [label="depth_camera_front_color_frame"];
+"depth_camera_front_color_optical_frame" [label="depth_camera_front_color_optical_frame"];
+"depth_camera_front_depth_optical_frame" [label="depth_camera_front_depth_optical_frame"];
+"wide_angle_camera_front_camera" [label="wide_angle_camera_front_camera"];
+"wide_angle_camera_front_camera_parent" [label="wide_angle_camera_front_camera_parent"];
+"face_rear" [label="face_rear"];
+"depth_camera_rear_camera" [label="depth_camera_rear_camera"];
+"depth_camera_rear_camera_parent" [label="depth_camera_rear_camera_parent"];
+"depth_camera_rear_color_frame" [label="depth_camera_rear_color_frame"];
+"depth_camera_rear_color_optical_frame" [label="depth_camera_rear_color_optical_frame"];
+"depth_camera_rear_depth_optical_frame" [label="depth_camera_rear_depth_optical_frame"];
+"wide_angle_camera_rear_camera" [label="wide_angle_camera_rear_camera"];
+"wide_angle_camera_rear_camera_parent" [label="wide_angle_camera_rear_camera_parent"];
+"handle" [label="handle"];
+"hatch" [label="hatch"];
+"remote" [label="remote"];
+"base_inertia" [label="base_inertia"];
+"depth_camera_left_camera" [label="depth_camera_left_camera"];
+"depth_camera_left_camera_parent" [label="depth_camera_left_camera_parent"];
+"depth_camera_left_color_frame" [label="depth_camera_left_color_frame"];
+"depth_camera_left_color_optical_frame" [label="depth_camera_left_color_optical_frame"];
+"depth_camera_left_depth_optical_frame" [label="depth_camera_left_depth_optical_frame"];
+"depth_camera_right_camera" [label="depth_camera_right_camera"];
+"depth_camera_right_camera_parent" [label="depth_camera_right_camera_parent"];
+"depth_camera_right_color_frame" [label="depth_camera_right_color_frame"];
+"depth_camera_right_color_optical_frame" [label="depth_camera_right_color_optical_frame"];
+"depth_camera_right_depth_optical_frame" [label="depth_camera_right_depth_optical_frame"];
+"docking_hatch_cover" [label="docking_hatch_cover"];
+"lidar_cage" [label="lidar_cage"];
+"lidar" [label="lidar"];
+"top_shell" [label="top_shell"];
+"imu_link" [label="imu_link"];
+node [shape=ellipse, color=blue, fontcolor=blue];
+"base" -> "base_LF_HAA" [label="xyz: 0.2999 0.104 0 \nrpy: 2.61799 -0 0"]
+"base_LF_HAA" -> "LF_HAA"
+"LF_HAA" -> "LF_HAA" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"LF_HAA" -> "LF_HIP"
+"LF_HIP" -> "LF_HIP_LF_hip_fixed" [label="xyz: 0 0 0 \nrpy: -2.61799 0 0"]
+"LF_HIP_LF_hip_fixed" -> "LF_hip_fixed"
+"LF_hip_fixed" -> "LF_hip_fixed_LF_HFE" [label="xyz: 0.0599 0.08381 0 \nrpy: 0 -0 1.5708"]
+"LF_hip_fixed_LF_HFE" -> "LF_HFE"
+"LF_HFE" -> "LF_HFE" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"LF_HFE" -> "LF_THIGH"
+"LF_THIGH" -> "LF_THIGH_LF_thigh_fixed" [label="xyz: 0 0 0 \nrpy: 0 0 -1.5708"]
+"LF_THIGH_LF_thigh_fixed" -> "LF_thigh_fixed"
+"LF_thigh_fixed" -> "LF_thigh_fixed_LF_KFE" [label="xyz: 0 0.1003 -0.285 \nrpy: 0 -0 1.5708"]
+"LF_thigh_fixed_LF_KFE" -> "LF_KFE"
+"LF_KFE" -> "LF_KFE" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"LF_KFE" -> "LF_SHANK"
+"LF_SHANK" -> "LF_shank_LF_shank_fixed" [label="xyz: 0 0 0 \nrpy: 0 0 -1.5708"]
+"LF_shank_LF_shank_fixed" -> "LF_shank_fixed"
+"LF_shank_fixed" -> "LF_shank_fixed_LF_FOOT" [label="xyz: 0.08795 0.01305 -0.33797 \nrpy: 0 -0 0"]
+"LF_shank_fixed_LF_FOOT" -> "LF_FOOT"
+"base" -> "base_LH_HAA" [label="xyz: -0.2999 0.104 0 \nrpy: -2.61799 -0 3.14159"]
+"base_LH_HAA" -> "LH_HAA"
+"LH_HAA" -> "LH_HAA" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"LH_HAA" -> "LH_HIP"
+"LH_HIP" -> "LH_HIP_LH_hip_fixed" [label="xyz: 0 0 0 \nrpy: -2.61799 -0 3.14159"]
+"LH_HIP_LH_hip_fixed" -> "LH_hip_fixed"
+"LH_hip_fixed" -> "LH_hip_fixed_LH_HFE" [label="xyz: -0.0599 0.08381 0 \nrpy: 0 -0 1.5708"]
+"LH_hip_fixed_LH_HFE" -> "LH_HFE"
+"LH_HFE" -> "LH_HFE" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"LH_HFE" -> "LH_THIGH"
+"LH_THIGH" -> "LH_THIGH_LH_thigh_fixed" [label="xyz: 0 0 0 \nrpy: 0 0 -1.5708"]
+"LH_THIGH_LH_thigh_fixed" -> "LH_thigh_fixed"
+"LH_thigh_fixed" -> "LH_thigh_fixed_LH_KFE" [label="xyz: -0 0.1003 -0.285 \nrpy: 0 -0 1.5708"]
+"LH_thigh_fixed_LH_KFE" -> "LH_KFE"
+"LH_KFE" -> "LH_KFE" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"LH_KFE" -> "LH_SHANK"
+"LH_SHANK" -> "LH_shank_LH_shank_fixed" [label="xyz: 0 0 0 \nrpy: 0 0 -1.5708"]
+"LH_shank_LH_shank_fixed" -> "LH_shank_fixed"
+"LH_shank_fixed" -> "LH_shank_fixed_LH_FOOT" [label="xyz: -0.08795 0.01305 -0.33797 \nrpy: 0 -0 0"]
+"LH_shank_fixed_LH_FOOT" -> "LH_FOOT"
+"base" -> "base_RF_HAA" [label="xyz: 0.2999 -0.104 0 \nrpy: -2.61799 0 0"]
+"base_RF_HAA" -> "RF_HAA"
+"RF_HAA" -> "RF_HAA" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"RF_HAA" -> "RF_HIP"
+"RF_HIP" -> "RF_HIP_RF_hip_fixed" [label="xyz: 0 0 0 \nrpy: 2.61799 -0 0"]
+"RF_HIP_RF_hip_fixed" -> "RF_hip_fixed"
+"RF_hip_fixed" -> "RF_hip_fixed_RF_HFE" [label="xyz: 0.0599 -0.08381 0 \nrpy: 0 0 -1.5708"]
+"RF_hip_fixed_RF_HFE" -> "RF_HFE"
+"RF_HFE" -> "RF_HFE" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"RF_HFE" -> "RF_THIGH"
+"RF_THIGH" -> "RF_THIGH_RF_thigh_fixed" [label="xyz: 0 0 0 \nrpy: 0 -0 1.5708"]
+"RF_THIGH_RF_thigh_fixed" -> "RF_thigh_fixed"
+"RF_thigh_fixed" -> "RF_thigh_fixed_RF_KFE" [label="xyz: 0 -0.1003 -0.285 \nrpy: 0 0 -1.5708"]
+"RF_thigh_fixed_RF_KFE" -> "RF_KFE"
+"RF_KFE" -> "RF_KFE" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"RF_KFE" -> "RF_SHANK"
+"RF_SHANK" -> "RF_shank_RF_shank_fixed" [label="xyz: 0 0 0 \nrpy: 0 -0 1.5708"]
+"RF_shank_RF_shank_fixed" -> "RF_shank_fixed"
+"RF_shank_fixed" -> "RF_shank_fixed_RF_FOOT" [label="xyz: 0.08795 -0.01305 -0.33797 \nrpy: 0 -0 0"]
+"RF_shank_fixed_RF_FOOT" -> "RF_FOOT"
+"base" -> "base_RH_HAA" [label="xyz: -0.2999 -0.104 0 \nrpy: 2.61799 -0 3.14159"]
+"base_RH_HAA" -> "RH_HAA"
+"RH_HAA" -> "RH_HAA" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"RH_HAA" -> "RH_HIP"
+"RH_HIP" -> "RH_HIP_RH_hip_fixed" [label="xyz: 0 0 0 \nrpy: 2.61799 -0 3.14159"]
+"RH_HIP_RH_hip_fixed" -> "RH_hip_fixed"
+"RH_hip_fixed" -> "RH_hip_fixed_RH_HFE" [label="xyz: -0.0599 -0.08381 0 \nrpy: 0 0 -1.5708"]
+"RH_hip_fixed_RH_HFE" -> "RH_HFE"
+"RH_HFE" -> "RH_HFE" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"RH_HFE" -> "RH_THIGH"
+"RH_THIGH" -> "RH_THIGH_RH_thigh_fixed" [label="xyz: 0 0 0 \nrpy: 0 -0 1.5708"]
+"RH_THIGH_RH_thigh_fixed" -> "RH_thigh_fixed"
+"RH_thigh_fixed" -> "RH_thigh_fixed_RH_KFE" [label="xyz: -0 -0.1003 -0.285 \nrpy: 0 0 -1.5708"]
+"RH_thigh_fixed_RH_KFE" -> "RH_KFE"
+"RH_KFE" -> "RH_KFE" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"RH_KFE" -> "RH_SHANK"
+"RH_SHANK" -> "RH_shank_RH_shank_fixed" [label="xyz: 0 0 0 \nrpy: 0 -0 1.5708"]
+"RH_shank_RH_shank_fixed" -> "RH_shank_fixed"
+"RH_shank_fixed" -> "RH_shank_fixed_RH_FOOT" [label="xyz: -0.08795 -0.01305 -0.33797 \nrpy: 0 -0 0"]
+"RH_shank_fixed_RH_FOOT" -> "RH_FOOT"
+"base" -> "base_battery" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_battery" -> "battery"
+"base" -> "base_bottom_shell" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_bottom_shell" -> "bottom_shell"
+"base" -> "base_face_front" [label="xyz: 0.4145 0 0 \nrpy: 0 0 0"]
+"base_face_front" -> "face_front"
+"face_front" -> "face_front_to_depth_camera_front_camera" [label="xyz: 0.04715 0 -0.0292 \nrpy: 0 0.523599 0"]
+"face_front_to_depth_camera_front_camera" -> "depth_camera_front_camera"
+"depth_camera_front_camera" -> "depth_camera_front_camera_to_camera_parent" [label="xyz: 0.0255 0.0175 0 \nrpy: 0 -0 0"]
+"depth_camera_front_camera_to_camera_parent" -> "depth_camera_front_camera_parent"
+"depth_camera_front_camera_parent" -> "depth_camera_front_camera_parent_to_color_frame" [label="xyz: 0 0.015 0 \nrpy: 0 -0 0"]
+"depth_camera_front_camera_parent_to_color_frame" -> "depth_camera_front_color_frame"
+"depth_camera_front_color_frame" -> "depth_camera_front_color_frame_to_color_optical_frame" [label="xyz: 0 0 0 \nrpy: -1.5708 -5.55112e-17 -1.5708"]
+"depth_camera_front_color_frame_to_color_optical_frame" -> "depth_camera_front_color_optical_frame"
+"depth_camera_front_camera_parent" -> "depth_camera_front_camera_parent_to_depth_optical_frame" [label="xyz: 0 0 0 \nrpy: -1.5708 -5.55112e-17 -1.5708"]
+"depth_camera_front_camera_parent_to_depth_optical_frame" -> "depth_camera_front_depth_optical_frame"
+"face_front" -> "face_front_to_wide_angle_camera_front_camera" [label="xyz: 0.0985 0 0.01497 \nrpy: 0 -0 0"]
+"face_front_to_wide_angle_camera_front_camera" -> "wide_angle_camera_front_camera"
+"wide_angle_camera_front_camera" -> "wide_angle_camera_front_camera_to_camera_parent" [label="xyz: 0 0 0 \nrpy: -1.5708 -5.55112e-17 -1.5708"]
+"wide_angle_camera_front_camera_to_camera_parent" -> "wide_angle_camera_front_camera_parent"
+"base" -> "base_face_rear" [label="xyz: -0.4145 0 0 \nrpy: 0 -0 -3.14159"]
+"base_face_rear" -> "face_rear"
+"face_rear" -> "face_rear_to_depth_camera_rear_camera" [label="xyz: 0.04715 0 -0.0292 \nrpy: 0 0.523599 0"]
+"face_rear_to_depth_camera_rear_camera" -> "depth_camera_rear_camera"
+"depth_camera_rear_camera" -> "depth_camera_rear_camera_to_camera_parent" [label="xyz: 0.0255 0.0175 0 \nrpy: 0 -0 0"]
+"depth_camera_rear_camera_to_camera_parent" -> "depth_camera_rear_camera_parent"
+"depth_camera_rear_camera_parent" -> "depth_camera_rear_camera_parent_to_color_frame" [label="xyz: 0 0.015 0 \nrpy: 0 -0 0"]
+"depth_camera_rear_camera_parent_to_color_frame" -> "depth_camera_rear_color_frame"
+"depth_camera_rear_color_frame" -> "depth_camera_rear_color_frame_to_color_optical_frame" [label="xyz: 0 0 0 \nrpy: -1.5708 -5.55112e-17 -1.5708"]
+"depth_camera_rear_color_frame_to_color_optical_frame" -> "depth_camera_rear_color_optical_frame"
+"depth_camera_rear_camera_parent" -> "depth_camera_rear_camera_parent_to_depth_optical_frame" [label="xyz: 0 0 0 \nrpy: -1.5708 -5.55112e-17 -1.5708"]
+"depth_camera_rear_camera_parent_to_depth_optical_frame" -> "depth_camera_rear_depth_optical_frame"
+"face_rear" -> "face_rear_to_wide_angle_camera_rear_camera" [label="xyz: 0.0985 0 0.01497 \nrpy: 0 -0 0"]
+"face_rear_to_wide_angle_camera_rear_camera" -> "wide_angle_camera_rear_camera"
+"wide_angle_camera_rear_camera" -> "wide_angle_camera_rear_camera_to_camera_parent" [label="xyz: 0 0 0 \nrpy: -1.5708 -5.55112e-17 -1.5708"]
+"wide_angle_camera_rear_camera_to_camera_parent" -> "wide_angle_camera_rear_camera_parent"
+"base" -> "base_handle" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_handle" -> "handle"
+"base" -> "base_hatch" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_hatch" -> "hatch"
+"base" -> "base_remote" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_remote" -> "remote"
+"base" -> "base_to_base_inertia" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_to_base_inertia" -> "base_inertia"
+"base" -> "base_to_depth_camera_left_camera" [label="xyz: 0 0.07646 0.02905 \nrpy: -3.20494e-17 0.523599 1.5708"]
+"base_to_depth_camera_left_camera" -> "depth_camera_left_camera"
+"depth_camera_left_camera" -> "depth_camera_left_camera_to_camera_parent" [label="xyz: 0.0255 0.0175 0 \nrpy: 0 -0 0"]
+"depth_camera_left_camera_to_camera_parent" -> "depth_camera_left_camera_parent"
+"depth_camera_left_camera_parent" -> "depth_camera_left_camera_parent_to_color_frame" [label="xyz: 0 0.015 0 \nrpy: 0 -0 0"]
+"depth_camera_left_camera_parent_to_color_frame" -> "depth_camera_left_color_frame"
+"depth_camera_left_color_frame" -> "depth_camera_left_color_frame_to_color_optical_frame" [label="xyz: 0 0 0 \nrpy: -1.5708 -5.55112e-17 -1.5708"]
+"depth_camera_left_color_frame_to_color_optical_frame" -> "depth_camera_left_color_optical_frame"
+"depth_camera_left_camera_parent" -> "depth_camera_left_camera_parent_to_depth_optical_frame" [label="xyz: 0 0 0 \nrpy: -1.5708 -5.55112e-17 -1.5708"]
+"depth_camera_left_camera_parent_to_depth_optical_frame" -> "depth_camera_left_depth_optical_frame"
+"base" -> "base_to_depth_camera_right_camera" [label="xyz: 0 -0.07646 0.02905 \nrpy: 3.20494e-17 0.523599 -1.5708"]
+"base_to_depth_camera_right_camera" -> "depth_camera_right_camera"
+"depth_camera_right_camera" -> "depth_camera_right_camera_to_camera_parent" [label="xyz: 0.0255 0.0175 0 \nrpy: 0 -0 0"]
+"depth_camera_right_camera_to_camera_parent" -> "depth_camera_right_camera_parent"
+"depth_camera_right_camera_parent" -> "depth_camera_right_camera_parent_to_color_frame" [label="xyz: 0 0.015 0 \nrpy: 0 -0 0"]
+"depth_camera_right_camera_parent_to_color_frame" -> "depth_camera_right_color_frame"
+"depth_camera_right_color_frame" -> "depth_camera_right_color_frame_to_color_optical_frame" [label="xyz: 0 0 0 \nrpy: -1.5708 -5.55112e-17 -1.5708"]
+"depth_camera_right_color_frame_to_color_optical_frame" -> "depth_camera_right_color_optical_frame"
+"depth_camera_right_camera_parent" -> "depth_camera_right_camera_parent_to_depth_optical_frame" [label="xyz: 0 0 0 \nrpy: -1.5708 -5.55112e-17 -1.5708"]
+"depth_camera_right_camera_parent_to_depth_optical_frame" -> "depth_camera_right_depth_optical_frame"
+"base" -> "base_to_docking_hatch_cover" [label="xyz: 0.343 0 -0.07 \nrpy: 0 -0 0"]
+"base_to_docking_hatch_cover" -> "docking_hatch_cover"
+"base" -> "base_to_lidar_cage" [label="xyz: -0.364 0 0.0735 \nrpy: 0 -0 0"]
+"base_to_lidar_cage" -> "lidar_cage"
+"lidar_cage" -> "lidar_cage_to_lidar" [label="xyz: 0 0 0.0687 \nrpy: 0 0 -1.5708"]
+"lidar_cage_to_lidar" -> "lidar"
+"base" -> "base_top_shell" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_top_shell" -> "top_shell"
+"base" -> "imu_joint" [label="xyz: 0.2488 0.00835 0.04628 \nrpy: 0 -0 1.5708"]
+"imu_joint" -> "imu_link"
+}

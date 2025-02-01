@@ -1,8 +1,10 @@
 {
   "dependencies": {
+    "com.unity.animation.rigging": "1.2.1",
     "com.unity.collab-proxy": "2.0.5",
     "com.unity.feature.development": "1.0.1",
     "com.unity.formats.usd": "https://github.com/Unity-Technologies/usd-unity-sdk.git?path=package/com.unity.formats.usd",
+    "com.unity.robotics.urdf-importer": "https://github.com/Unity-Technologies/URDF-Importer.git?path=/com.unity.robotics.urdf-importer",
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.timeline": "1.7.4",
     "com.unity.ugui": "1.0.0",
