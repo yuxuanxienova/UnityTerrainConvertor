@@ -1,28 +1,62 @@
 # UnityTerrainConvertor
-This project provides scripts for:
-- 1 Converting unity terrain object into mesh, export to .obj file
-- 2 Combine multiple meshes
-- 3 Export game object to .obj file
+## Latest Update 27/03/2025
+## Project Architecture
+``` bash
+├───Assets
+│   ├───Prefab #example scene here
+│   ├───Scenes
+│   ├───Scripts
+│   │   ├───MeshCombiner # One Click Mesh Combination coded here
+│   │   ├───OBJExporter # One Click Mesh Export coded here
+│   │   ├───Export Object Position #One Click waypoint position export coded here
+│   │   └───...
+│   ├───ExampleResources
+│   │   ├───map_v1 #example map here
+│   │   ├───isaac_gym_files #example isaacgym terrain files here
+...
+```
+## 1. One Click Mesh Combination
+no need to export terrain and reload now!
+### 1.1 Place All things you want to combine under a parent gameObject(for example the object called "Map" here)
+### here we combine a cube(with mesh) and the terrain
+![Demo Image](images/image1_1.png)
+### 1.2 In Menu bar click "Tools" -> "Combine Meshes"(Note the parent gameObject should be selected in hierarchy window)
+### 1.3 Then all childs mesh and terrain under that parent object will be combined into one mesh called "CombinedMesh"
+![Demo Image](images/image1_2.png)
 
-## Step By Step Guide
-### Step1 Converting unity terrain object into mesh
-- 1.0 Create a terrain by rightclick -> "3D Object" -> "Terrain"
-- 1.1 Shape your terrain
-- 1.2 In Menu bar click "Terrain" -> "Export to Obj..."
-- 1.3 Then a .obj file will create for the terrain , but without additional object on it.
+## 2. One Click Mesh Export to .obj File
+### 2.0 Select the combined mesh generated
+### 2.1 In Menu bar click "Tools" -> "Export Selected to OBJ"(we export using "Export in ROS coordinate" to fit with API in isaac_gym)
+### 2.2 Place your .obj file under for example Assets/ExampleResources/map_v1/CombinedMeshes.obj
 
-### Step2 Combine Terrain mesh with other object
-- 2.0 Import the terrain mesh by drag and drop the .obj file in first step
-- 2.1 Create a empty gameObject named as for example "Combined mesh"
-- 2.2 Put all game objects and terrain mesh as the children of "Combined mesh" 
-- 2.3 Select "Combined mesh" object in hierarchy window
-- 2.4 In Menu bar click "Tools" -> "Combine Meshes"
-- 2.5 A combined mesh will then generated
 
-### Step3 Export The Combined Mesh
-- 3.0 Select the combined mesh generated
-- 3.1 In Menu bar click "Tools" -> "Export Selected to OBJ"
+## 3. One Click Waypoint Pair Export
+### 3.0 Under a empty gameObject called "waypoints", create a empty gameObject called "waypoint1" and give it a icon (those name not important)
+![Demo Image](images/image3_1.png)
+### 3.1 Click Add tag if no tag called "way_point"(tag name is important!!), and assign them with tag "way_point"
+![Demo Image](images/image3_2.png)
+![Demo Image](images/image3_3.png)
+![Demo Image](images/image3_4.png)
+### 3.2 we have two waypoints now and select the parent object , Tools->Export Object Positions
+![Demo Image](images/image3_5.png)
+![Demo Image](images/image3_6.png)
+### 3.3 default setting is okay, export under same folder as .obj file Assets/ExampleResources/map_v1/point_set_1.txt
+![Demo Image](images/image3_7.png)
+### 3.4 now you can move all things under "map_v1" folder to your isaac gym resources folder!
 
-### Demo 
-A mountain terrain mesh combined with a fence mesh
-![Demo Image](images/Demo.png)
+## 4. isaacGym UnityTerrainModule
+![Demo Image](images/image4_1.png)
+### 4.1 Simple Module Plug-in:
+You only need to call "init" "add_to_sim" "on_env_reset_idx" in proper place to set it up
+#### 4.1.1 initialize the module and call add_to_sim in legged gym "create_envs" function
+![Demo Image](images/image4_2.png)
+#### 4.1.2 call on_env_reset_idx in reset_idx
+![Demo Image](images/image4_3.png)
+### 4.2 Module Configuration
+Here we use "point_pair_files" as environment origin and target pattern, this loads the point pair file we generated before
+![Demo Image](images/image4_4.png)
+### 4.3 resample target
+When resample target, use the goal stored in your terrain module(read from your point pair file)
+![Demo Image](images/image4_5.png)
+
+

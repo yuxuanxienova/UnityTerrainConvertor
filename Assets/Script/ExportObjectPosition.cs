@@ -7,8 +7,10 @@ using System.Text;
 public class ExportObjectPositions : EditorWindow
 {
     private bool exportAllObjects = false;
-    private bool exportInROSCoordinateFrame = false;
-    private string fileName = "ObjectPositions.txt";
+    private bool exportInROSCoordinateFrame = true;
+    private bool includingSelectedObj = false;
+    private string fileName = "point_set_1.txt";
+    private string childTag = "way_point";  // New field to specify the tag for child objects
 
     [MenuItem("Tools/Export Object Positions…")]
     static void Init()
@@ -20,7 +22,7 @@ public class ExportObjectPositions : EditorWindow
 
     void OnGUI()
     {
-        GUILayout.Label("Export Object Positions", EditorStyles.boldLabel);
+        GUILayout.Label("Export Object Positions With Tag", EditorStyles.boldLabel);
 
         EditorGUILayout.Space();
         exportAllObjects = EditorGUILayout.Toggle("Export All Objects", exportAllObjects);
@@ -29,7 +31,14 @@ public class ExportObjectPositions : EditorWindow
         exportInROSCoordinateFrame = EditorGUILayout.Toggle("Export In ROS Coordinate", exportInROSCoordinateFrame);
 
         EditorGUILayout.Space();
+        includingSelectedObj = EditorGUILayout.Toggle("Including Selected Obj", includingSelectedObj);
+
+        EditorGUILayout.Space();
         fileName = EditorGUILayout.TextField("File Name", fileName);
+
+        EditorGUILayout.Space();
+        // New GUI field to specify the tag used for filtering child objects
+        childTag = EditorGUILayout.TextField("Tag", childTag);
 
         EditorGUILayout.Space();
         if (GUILayout.Button("Export"))
@@ -49,12 +58,24 @@ public class ExportObjectPositions : EditorWindow
         }
         else
         {
-            // Only export currently selected objects
+            // Only export currently selected objects and, if specified,
+            // all child objects (recursively) that have the given tag.
             foreach (var obj in Selection.objects)
             {
                 if (obj is GameObject go)
                 {
-                    objectsToExport.Add(go);
+                    if (includingSelectedObj) 
+                    {
+                        objectsToExport.Add(go);
+                    }
+                    
+
+                    // If a specific child tag is provided, add all child objects with that tag.
+                    if (!string.IsNullOrEmpty(childTag))
+                    {
+                        List<GameObject> childObjects = GetChildGameObjectsWithTag(go, childTag);
+                        objectsToExport.AddRange(childObjects);
+                    }
                 }
             }
         }
@@ -112,5 +133,29 @@ public class ExportObjectPositions : EditorWindow
 
         // For older versions of Unity or without using SceneManager explicitly:
         return Resources.FindObjectsOfTypeAll<GameObject>();
+    }
+
+    /// <summary>
+    /// Recursively retrieves all child GameObjects under 'parent' that have the specified tag.
+    /// </summary>
+    /// <param name="parent">The parent GameObject to search under.</param>
+    /// <param name="tag">The tag to filter child objects by.</param>
+    /// <returns>A list of GameObjects that are children (or descendants) with the given tag.</returns>
+    private List<GameObject> GetChildGameObjectsWithTag(GameObject parent, string tag)
+    {
+        List<GameObject> result = new List<GameObject>();
+
+        foreach (Transform child in parent.transform)
+        {
+            if (child.CompareTag(tag))
+            {
+                result.Add(child.gameObject);
+            }
+
+            // Recursively search the child's children.
+            result.AddRange(GetChildGameObjectsWithTag(child.gameObject, tag));
+        }
+
+        return result;
     }
 }

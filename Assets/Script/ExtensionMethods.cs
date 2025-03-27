@@ -1,3 +1,4 @@
+//Utils for unity ros conversion and Extracting Terrain Mesh-by yuxuanxie
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -49,5 +50,61 @@ public static class ExtensionMethods
         return new Vector2(uv.x, 1.0f - uv.y);
     }
 
+    enum Resolution { Full = 0, Half, Quarter, Eighth, Sixteenth }
 
+    public static Mesh TerrainToMesh(Terrain terrainObj)
+    {
+        Resolution Resolution = Resolution.Half;
+        TerrainData terrainData = terrainObj.terrainData;
+        int w = terrainData.heightmapResolution;
+        int h = terrainData.heightmapResolution;
+        Vector3 meshScale = terrainData.size;
+        int tRes = (int)Mathf.Pow(2, (int)Resolution);
+        meshScale = new Vector3(meshScale.x / (w - 1) * tRes, meshScale.y, meshScale.z / (h - 1) * tRes);
+        Vector2 uvScale = new Vector2(1.0f / (w - 1), 1.0f / (h - 1));
+        float[,] tData = terrainData.GetHeights(0, 0, w, h);
+
+        w = (w - 1) / tRes ;
+        h = (h - 1) / tRes ;
+        Vector3[] tVertices = new Vector3[w * h];
+        Vector2[] tUV = new Vector2[w * h];
+        int[] tPolys = new int[(w - 1) * (h - 1) * 6];
+
+        // Build vertices and UVs using standard orientation (x, height, z)
+        for (int y = 0; y < h; y++)
+        {
+            for (int x = 0; x < w; x++)
+            {
+                tVertices[x * w + y] = Vector3.Scale(meshScale, new Vector3(y, tData[x * tRes, y * tRes], x));
+                tUV[x * w + y] = Vector2.Scale(new Vector2(y * tRes, x * tRes), uvScale);
+            }
+        }
+
+        int index = 0;
+        // Build triangle indices (winding order may be adjusted if needed)
+        for (int y = 0; y < h - 1; y++)
+        {
+            for (int x = 0; x < w - 1; x++)
+            {
+                // Triangle 1
+                tPolys[index++] = (x * w) + y;
+                tPolys[index++] = ((x + 1) * w) + y;
+                tPolys[index++] = (x * w) + y + 1;
+
+                // Triangle 2
+                tPolys[index++] = ((x + 1) * w) + y;
+                tPolys[index++] = ((x + 1) * w) + y + 1;
+                tPolys[index++] = (x * w) + y + 1;
+            }
+        }
+
+        Mesh terrainMesh = new Mesh();
+        terrainMesh.vertices = tVertices;
+        terrainMesh.uv = tUV;
+        terrainMesh.triangles = tPolys;
+        terrainMesh.RecalculateNormals();
+        terrainMesh.RecalculateBounds();
+
+        return terrainMesh;
+    }
 }

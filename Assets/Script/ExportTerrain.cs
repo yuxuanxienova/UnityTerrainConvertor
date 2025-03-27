@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Text;
+using Unity.VisualScripting;
 
 enum SaveFormat { Triangles, Quads }
 enum SaveResolution { Full = 0, Half, Quarter, Eighth, Sixteenth }
@@ -16,7 +17,7 @@ class ExportTerrain : EditorWindow
     SaveFormat saveFormat = SaveFormat.Triangles;
     SaveResolution saveResolution = SaveResolution.Half;
 
-    static TerrainData terrain;
+    static TerrainData terrainData;
     static Vector3 terrainPos;
 
     int tCount;
@@ -27,24 +28,30 @@ class ExportTerrain : EditorWindow
     [MenuItem("Terrain/Export To Obj...")]
     static void Init()
     {
-        terrain = null;
-        Terrain terrainObject = Selection.activeObject as Terrain;
-        if (!terrainObject)
-        {
-            terrainObject = Terrain.activeTerrain;
-        }
-        if (terrainObject)
-        {
-            terrain = terrainObject.terrainData;
-            terrainPos = terrainObject.transform.position;
-        }
 
         EditorWindow.GetWindow<ExportTerrain>().Show();
     }
 
     void OnGUI()
     {
-        if (!terrain)
+        terrainData = null;
+        Terrain terrainObject = Selection.activeObject.GetComponent<Terrain>();
+        if (!terrainObject)
+        {
+            GUILayout.Label("No terrain found");
+            if (GUILayout.Button("Cancel"))
+            {
+                EditorWindow.GetWindow<ExportTerrain>().Close();
+            }
+            return;
+        }
+        if (terrainObject)
+        {
+            terrainData = terrainObject.terrainData;
+            terrainPos = terrainObject.transform.position;
+        }
+
+        if (!terrainData)
         {
             GUILayout.Label("No terrain found");
             if (GUILayout.Button("Cancel"))
@@ -59,20 +66,20 @@ class ExportTerrain : EditorWindow
 
         if (GUILayout.Button("Export"))
         {
-            Export();
+            Export(terrainData);
         }
     }
 
-    void Export()
+    void Export(TerrainData terrainData)
     {
         string fileName = EditorUtility.SaveFilePanel("Export .obj file", "", "Terrain", "obj");
-        int w = terrain.heightmapResolution;
-        int h = terrain.heightmapResolution;
-        Vector3 meshScale = terrain.size;
+        int w = terrainData.heightmapResolution;
+        int h = terrainData.heightmapResolution;
+        Vector3 meshScale = terrainData.size;
         int tRes = (int)Mathf.Pow(2, (int)saveResolution);
         meshScale = new Vector3(meshScale.x / (w - 1) * tRes, meshScale.y, meshScale.z / (h - 1) * tRes);
         Vector2 uvScale = new Vector2(1.0f / (w - 1), 1.0f / (h - 1));
-        float[,] tData = terrain.GetHeights(0, 0, w, h);
+        float[,] tData = terrainData.GetHeights(0, 0, w, h);
 
         w = (w - 1) / tRes + 1;
         h = (h - 1) / tRes + 1;
@@ -199,7 +206,7 @@ class ExportTerrain : EditorWindow
         }
         sw.Close();
 
-        terrain = null;
+        terrainData = null;
         EditorUtility.DisplayProgressBar("Saving file to disc.", "This might take a while...", 1f);
         EditorWindow.GetWindow<ExportTerrain>().Close();
         EditorUtility.ClearProgressBar();
@@ -213,4 +220,6 @@ class ExportTerrain : EditorWindow
             EditorUtility.DisplayProgressBar("Saving...", "", Mathf.InverseLerp(0, totalCount, ++tCount));
         }
     }
+
+
 }

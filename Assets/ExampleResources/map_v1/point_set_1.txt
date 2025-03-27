@@ -1,0 +1,4 @@
+﻿Object Positions Export
+=======================
+Object: waypoint1, Position: (2.4, -23.42835, 0.1999998)
+Object: waypoint1 (1), Position: (2.4, -38.2, 0.1999998)
