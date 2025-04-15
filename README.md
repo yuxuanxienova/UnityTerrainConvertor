@@ -1,5 +1,5 @@
 # UnityTerrainConvertor
-## Latest Update 27/03/2025
+## Latest Update 15/04/2025
 ## Project Architecture
 ``` bash
 ├───Assets
@@ -58,5 +58,40 @@ Here we use "point_pair_files" as environment origin and target pattern, this lo
 ### 4.3 resample target
 When resample target, use the goal stored in your terrain module(read from your point pair file)
 ![Demo Image](images/image4_5.png)
+
+## 5. About Coordinate Alignment
+
+### 5.1 Why we need to align the coordinate?
+ 
+To better understand this project, you need to know why and how we align the coordinate.
+
+First, when converting a mesh to .obj file, we extract the local coordinate of the mesh vertices: i.e. the coordinate of the vertices relative to mesh object, corresponding code:
+
+![Demo Image](images/image5_1.png)
+
+
+However, when storing the point pair, we store the global coordinate of the points:i.e. the coordinate of the point object relative to world frame.
+corresponding code:
+
+![Demo Image](images/image5_2.png)
+
+So, when exporting mesh to .obj, you should make sure the mesh coordinate is the same as global world coordinate!
+
+### 5.2 How to check if mesh object coordinate is the same as global world coordinate?
+
+
+### 5.2.1 Understand Unity Editor Transform in Inspector
+
+The transform in Inspector of an object shows the transform relative to it's parent object
+
+![Demo Image](images/image5_3.png)
+![Demo Image](images/image5_4.png)
+
+here the parent relation: Scene(world) -> navigation_map_v2 ->CombinedMesh
+
+So we need to make sure the transform of Combined Mesh relative to navigation_map_v2 is zero, and , transform of navigation_map_v2 relative to Scene is zero!
+
+
+The relative transform of the waypoint is not important, as we read the world coordinate directly in the code. So long as your mesh coordinate align with world coordinate, the waypoint position in world coordinate should be the same as the waypoint position in mesh object coordinate.
 
 
