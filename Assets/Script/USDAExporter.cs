@@ -68,7 +68,7 @@ public class USDAExporter : EditorWindow
             using (StreamWriter sw = new StreamWriter(path, false, new UTF8Encoding(false)))
             {
                 WriteUsdHeader(sw);
-                WriteMeshPrim(sw, selected.name, mesh);
+                WriteMeshPrim(sw, selected.name, mesh, "    ");
                 WriteWorldFooter(sw);
             }
 
@@ -100,8 +100,12 @@ public class USDAExporter : EditorWindow
         sw.WriteLine("}");
     }
 
-    private void WriteMeshPrim(StreamWriter sw, string primName, Mesh mesh)
+    private void WriteMeshPrim(StreamWriter sw, string primName, Mesh mesh, string indent)
     {
+        string ind0 = indent;              // inside World
+        string ind1 = ind0 + "    ";      // inside Mesh body
+        string ind2 = ind1 + "    ";      // array elements
+
         // Collect mesh data
         Vector3[] vertices = mesh.vertices;
         Vector3[] normals = mesh.normals;
@@ -212,78 +216,84 @@ public class USDAExporter : EditorWindow
         }
 
         // Write USD Mesh prim with API schemas metadata
-        sw.WriteLine("def Mesh \"" + primName + "\" (");
-        sw.WriteLine("    prepend apiSchemas = [\"UsdPhysicsCollisionAPI\", \"UsdPhysicsMeshCollisionAPI\"]");
-        sw.WriteLine(")");
-        sw.WriteLine("{");
+        sw.WriteLine(ind0 + "def Mesh \"" + primName + "\" (");
+        sw.WriteLine(ind1 + "prepend apiSchemas = [\"PhysicsCollisionAPI\", \"PhysicsMeshCollisionAPI\"]");
+        sw.WriteLine(ind0 + ")");
+        sw.WriteLine(ind0 + "{");
 
         // extent
-        sw.WriteLine("    uniform float3[] extent = [");
-        sw.WriteLine("        (" + FormatFloat(minExtent.x) + ", " + FormatFloat(minExtent.y) + ", " + FormatFloat(minExtent.z) + "),");
-        sw.WriteLine("        (" + FormatFloat(maxExtent.x) + ", " + FormatFloat(maxExtent.y) + ", " + FormatFloat(maxExtent.z) + ")");
-        sw.WriteLine("    ]");
+        sw.WriteLine(ind1 + "uniform float3[] extent = [");
+        sw.WriteLine(ind2 + "(" + FormatFloat(minExtent.x) + ", " + FormatFloat(minExtent.y) + ", " + FormatFloat(minExtent.z) + "),");
+        sw.WriteLine(ind2 + "(" + FormatFloat(maxExtent.x) + ", " + FormatFloat(maxExtent.y) + ", " + FormatFloat(maxExtent.z) + ")");
+        sw.WriteLine(ind1 + "]");
 
         // points
-        sw.WriteLine("    point3f[] points = [");
+        sw.WriteLine(ind1 + "point3f[] points = [");
         for (int i = 0; i < points.Length; i++)
         {
             Vector3 p = points[i];
             string suffix = (i == points.Length - 1) ? string.Empty : ",";
-            sw.WriteLine("        (" + FormatFloat(p.x) + ", " + FormatFloat(p.y) + ", " + FormatFloat(p.z) + ")" + suffix);
+            sw.WriteLine(ind2 + "(" + FormatFloat(p.x) + ", " + FormatFloat(p.y) + ", " + FormatFloat(p.z) + ")" + suffix);
         }
-        sw.WriteLine("    ]");
+        sw.WriteLine(ind1 + "]");
 
         // face counts
-        sw.WriteLine("    int[] faceVertexCounts = [");
+        sw.WriteLine(ind1 + "int[] faceVertexCounts = [");
         for (int i = 0; i < faceCounts.Length; i++)
         {
             string suffix = (i == faceCounts.Length - 1) ? string.Empty : ",";
-            sw.WriteLine("        " + faceCounts[i] + suffix);
+            sw.WriteLine(ind2 + faceCounts[i] + suffix);
         }
-        sw.WriteLine("    ]");
+        sw.WriteLine(ind1 + "]");
 
         // face indices
-        sw.WriteLine("    int[] faceVertexIndices = [");
+        sw.WriteLine(ind1 + "int[] faceVertexIndices = [");
         for (int i = 0; i < faceIndices.Length; i++)
         {
             string suffix = (i == faceIndices.Length - 1) ? string.Empty : ",";
-            sw.WriteLine("        " + faceIndices[i] + suffix);
+            sw.WriteLine(ind2 + faceIndices[i] + suffix);
         }
-        sw.WriteLine("    ]");
+        sw.WriteLine(ind1 + "]");
 
         // Physics collision attributes (enabled and mesh approximation)
         sw.WriteLine("    bool physics:collisionEnabled = 1");
-        sw.WriteLine("    token physics:approximation = \"triangleMesh\"");
+        sw.WriteLine("    uniform token physics:approximation = \"triangleMesh\"");
 
         // normals (vertex interpolation)
         if (outNormals != null)
         {
-            sw.WriteLine("    normal3f[] normals = [");
+            sw.WriteLine(ind1 + "normal3f[] normals = [");
             for (int i = 0; i < outNormals.Length; i++)
             {
                 Vector3 n = outNormals[i];
                 string suffix = (i == outNormals.Length - 1) ? string.Empty : ",";
-                sw.WriteLine("        (" + FormatFloat(n.x) + ", " + FormatFloat(n.y) + ", " + FormatFloat(n.z) + ")" + suffix);
+                sw.WriteLine(ind2 + "(" + FormatFloat(n.x) + ", " + FormatFloat(n.y) + ", " + FormatFloat(n.z) + ")" + suffix);
             }
-            sw.WriteLine("    ]");
-            sw.WriteLine("    uniform token normals:interpolation = \"vertex\"");
+            sw.WriteLine(ind1 + "]");
+            sw.WriteLine(ind1 + "uniform token normals:interpolation = \"vertex\"");
         }
 
         // UVs as primvar st (vertex interpolation)
         if (outUvs != null)
         {
-            sw.WriteLine("    texCoord2f[] primvars:st = [");
+            sw.WriteLine(ind1 + "texCoord2f[] primvars:st = [");
             for (int i = 0; i < outUvs.Length; i++)
             {
                 Vector2 uv = outUvs[i];
                 string suffix = (i == outUvs.Length - 1) ? string.Empty : ",";
-                sw.WriteLine("        (" + FormatFloat(uv.x) + ", " + FormatFloat(uv.y) + ")" + suffix);
+                sw.WriteLine(ind2 + "(" + FormatFloat(uv.x) + ", " + FormatFloat(uv.y) + ")" + suffix);
             }
-            sw.WriteLine("    ]");
-            sw.WriteLine("    uniform token primvars:st:interpolation = \"vertex\"");
+            sw.WriteLine(ind1 + "]");
+            sw.WriteLine(ind1 + "uniform token primvars:st:interpolation = \"vertex\"");
         }
 
-        sw.WriteLine("}");
+        // Physics collision attributes (enabled and mesh approximation)
+        sw.WriteLine(ind1 + "bool physics:collisionEnabled = 1");
+        sw.WriteLine(ind1 + "uniform token physics:approximation = \"none\"");
+        sw.WriteLine(ind1 + "uniform token subdivisionScheme = \"none\"");
+        sw.WriteLine(ind1 + "uniform bool doubleSided = 1");
+
+        sw.WriteLine(ind0 + "}");
     }
 
     private string FormatFloat(float v)
