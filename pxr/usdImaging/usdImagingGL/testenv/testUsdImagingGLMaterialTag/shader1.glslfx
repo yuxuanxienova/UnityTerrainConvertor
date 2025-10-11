@@ -1,0 +1,32 @@
+-- glslfx version 0.1
+
+//
+// Copyright 2016 Pixar
+//
+// Licensed under the terms set forth in the LICENSE.txt file available at
+// https://openusd.org/license.
+//
+
+-- configuration
+{
+    "metadata": {
+        "materialTag": "additive"
+    },
+    "techniques": {
+        "default": {
+            "surfaceShader": {
+                "source": [ "Surface.Fallback" ]
+            }
+        }
+    }
+}
+
+--- --------------------------------------------------------------------------
+-- glsl Surface.Fallback
+                                                                                    
+vec4 surfaceShader(vec4 Peye, vec3 Neye, vec4 color, vec4 patchCoord)
+{
+    color.rgb = vec3(0,0,0.5);
+    color.a = 0.5;
+    return color;
+}

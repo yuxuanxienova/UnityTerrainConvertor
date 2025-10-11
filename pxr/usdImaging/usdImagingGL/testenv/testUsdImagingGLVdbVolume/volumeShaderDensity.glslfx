@@ -1,0 +1,103 @@
+-- glslfx version 0.1
+
+//
+// Copyright 2019 Pixar
+//
+// Licensed under the terms set forth in the LICENSE.txt file available at
+// https://openusd.org/license.
+//
+
+-- configuration
+{
+    "techniques": {
+        "default": {
+            "volumeShader": {
+                "source": [ "VolumeShaderDensity.VolumeShader" ]
+            }
+        }
+    },
+
+    "parameters" : {
+        "density": {
+            "default": 0.0,
+            "type": "float",
+            "description":"density."
+        },
+        "densityScale": {
+            "default": 0.1,
+            "type": "float",
+            "description":"density."
+        },
+        "albedo": {
+            "default": [0.0, 0.0, 0.0],
+            "type": "vec3",
+            "description":"albedo."
+        },
+        "fallbackReader": {
+            "default":  [0.0, 0.0, 0.0],
+            "type": "vec3",
+            "description":"fallback reader."
+        }
+    }
+}
+
+--- --------------------------------------------------------------------------
+-- glsl VolumeShaderDensity.VolumeShader
+
+// Return zero density unless the value we read for fallbackReader is (1,4,9).
+// This tests that a field reader node defaults to its fallback value when the
+// corresponding field does not exist on the volume.
+float
+checkFallbackValue(vec3 s)
+{
+    vec3 expectedFallbackValue = vec3(1,4,9);
+    float diffFromExpected = length(HdGet_fallbackReader(s) - expectedFallbackValue);
+
+    return step(diffFromExpected, 0.01);
+}
+
+float
+getDensitySample(vec3 p)
+{
+    return HdGet_density(p) * checkFallbackValue(p) * HdGet_densityScale();
+}
+
+// Extinction function, returns sum of absorption and out-scattering cross
+// ratio.
+//
+float
+extinctionFunction(vec3 p)
+{
+    return getDensitySample(p);
+}
+
+// Scattering function, returns in-scattering cross-section (will be combined
+// with phase function).
+float
+scatteringFunction(vec3 p)
+{
+    return getDensitySample(p) * HdGet_albedo();
+}
+
+// Emission function, returns emission cross-section.
+//
+// Here: constant on ellipsoid and zero outside.
+vec3
+emissionFunction(vec3 p)
+{
+    return vec3(0.0);
+}
+
+// Phase function in volume rendering equation.
+//
+// Here: isotropic.
+float
+phaseFunction(vec3 direction1, vec3 direction2)
+{
+    const float pi = 3.14159265358979;
+    const float sphereArea = 4.0 * pi;
+    const float inverseSphereArea = 1.0 / sphereArea;
+
+    return inverseSphereArea;
+}
+

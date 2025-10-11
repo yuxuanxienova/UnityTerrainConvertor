@@ -1,0 +1,33 @@
+-- glslfx version 0.1
+
+//
+// Copyright 2017 Pixar
+//
+// Licensed under the terms set forth in the LICENSE.txt file available at
+// https://openusd.org/license.
+//
+
+-- configuration
+{
+    "techniques": {
+        "default": {
+            "surfaceShader": {
+                "source": [ "Surface.Fallback" ]
+            }
+        }
+    },
+    "parameters" : {
+        "diffuseColor": {
+            "default": [0.0, 0.0, 0.0]
+        }
+    }
+}
+
+--- --------------------------------------------------------------------------
+-- glsl Surface.Fallback
+
+vec4 surfaceShader(vec4 Peye, vec3 Neye, vec4 color, vec4 patchCoord)
+{
+    color.rgb = FallbackLighting(Peye.xyz, Neye, HdGet_diffuseColor().rgb);
+    return color;
+}

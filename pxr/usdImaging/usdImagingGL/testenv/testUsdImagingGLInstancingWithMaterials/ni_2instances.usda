@@ -1,0 +1,28 @@
+#usda 1.0
+(
+    upAxis = "Z"
+)
+
+# The prototype cube has no material binding.
+# Both cubes should use the fallback material.
+#
+def Xform "Scene"
+{
+    over "Instance1" (
+        instanceable = true
+        references = @cube.usda@</Group>
+    )
+    {
+        float3 xformOp:translate = (-3, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+
+    over "Instance2" (
+        instanceable = true
+        references = @cube.usda@</Group>
+    )
+    {
+        float3 xformOp:translate = (3, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+}

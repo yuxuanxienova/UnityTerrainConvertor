@@ -1,0 +1,97 @@
+-- glslfx version 0.1
+
+//
+// Copyright 2019 Pixar
+//
+// Licensed under the terms set forth in the LICENSE.txt file available at
+// https://openusd.org/license.
+//
+
+-- configuration
+{
+    "techniques": {
+        "default": {
+            "volumeShader": {
+                "source": [ "VolumeShaderDensity.VolumeShader" ]
+            }
+        }
+    },
+
+    "parameters" : {
+        "density": {
+            "default": 0.0,
+            "description":"density.",
+            "type": "float"
+        },
+        "heat": {
+            "default": 0.0,
+            "description":"heat.",
+            "type": "float"
+        },
+        "albedo": {
+            "default": 0.0,
+            "description":"albedo.",
+            "type": "float"
+        },
+        "densityScale": {
+            "default": 0.0,
+            "description":"densityScale.",
+            "type": "float"
+        },
+        "heatScale": {
+            "default": 0.0,
+            "description":"heatScale.",
+            "type": "float"
+        }
+    }
+}
+
+--- --------------------------------------------------------------------------
+-- glsl VolumeShaderDensity.VolumeShader
+
+float
+getDensitySample(vec3 p)
+{
+    return HdGet_density(p);
+}
+
+// Extinction function, returns sum of absorption and out-scattering cross
+// ratio.
+//
+float
+extinctionFunction(vec3 p)
+{
+    return getDensitySample(p) * HdGet_densityScale();
+}
+
+// Scattering function, returns in-scattering cross-section (will be combined
+// with phase function).
+float
+scatteringFunction(vec3 p)
+{
+    return getDensitySample(p) * HdGet_albedo();
+}
+
+// Emission function, returns emission cross-section.
+//
+vec3
+emissionFunction(vec3 p)
+{
+    const float heat = HdGet_heatScale() * HdGet_heat(p);
+
+    return getDensitySample(p) * vec3(min(0.5 * heat, 0.5), min(0.1 * heat, 0.5), 0.0);
+}
+
+// Phase function in volume rendering equation.
+//
+// Here: isotropic.
+float
+phaseFunction(vec3 direction1, vec3 direction2)
+{
+    const float pi = 3.14159265358979;
+    const float sphereArea = 4.0 * pi;
+    const float inverseSphereArea = 1.0 / sphereArea;
+
+    return inverseSphereArea;
+}
+
