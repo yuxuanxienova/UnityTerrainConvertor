@@ -6,7 +6,7 @@
 def Xform "World" {
 
 def Mesh "CombinedMesh" (
-    apiSchemas = ["UsdPhysicsCollisionAPI", "UsdPhysicsMeshCollisionAPI"]
+    prepend apiSchemas = ["UsdPhysicsCollisionAPI", "UsdPhysicsMeshCollisionAPI"]
 )
 {
     uniform float3[] extent = [

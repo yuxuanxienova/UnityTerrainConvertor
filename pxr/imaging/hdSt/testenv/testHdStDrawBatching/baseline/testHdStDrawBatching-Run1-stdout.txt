@@ -1,0 +1,172 @@
+==== IndirectDrawBatchTest:
+----- begin -----
+nonUniformSize, 0
+numberOfTextureHandles, 0
+numberOfTextureObjects, 0
+singleBufferSize, 0
+textureMemory, 0
+garbageCollected = 0
+drawCalls = 0
+num batches: 5
+----- batched -----
+nonUniformSize, 1512
+numberOfTextureHandles, 0
+numberOfTextureObjects, 0
+primvar, 4240
+singleBufferSize, 0
+textureMemory, 0
+topology, 472
+garbageCollected = 0
+drawCalls = 0
+----- executed -----
+drawIndirect, 600
+drawIndirectCull, 600
+drawIndirectResult, 20
+nonUniformSize, 1512
+numberOfTextureHandles, 0
+numberOfTextureObjects, 0
+primvar, 4240
+singleBufferSize, 0
+textureMemory, 0
+topology, 472
+garbageCollected = 0
+drawCalls = 5
+----- clear all -----
+nonUniformSize, 0
+numberOfTextureHandles, 0
+numberOfTextureObjects, 0
+singleBufferSize, 0
+textureMemory, 0
+garbageCollected = 1
+drawCalls = 5
+
+==== IndirectDrawBatchMigrationTest:
+----- begin -----
+nonUniformSize, 0
+numberOfTextureHandles, 0
+numberOfTextureObjects, 0
+singleBufferSize, 0
+textureMemory, 0
+garbageCollected = 0
+drawCalls = 0
+rebuildBatches = 0
+bufferArrayRangeMigrated = 0
+----- draw flat -----
+drawIndirect, 240
+drawIndirectCull, 240
+drawIndirectResult, 4
+nonUniformSize, 960
+numberOfTextureHandles, 0
+numberOfTextureObjects, 2
+primvar, 1760
+singleBufferSize, 0
+textureMemory, 786432
+topology, 480
+garbageCollected = 0
+drawCalls = 1
+drawBatches = 1
+itemsDrawn = 4
+drawItemsFetched = 1
+rebuildBatches = 1
+bufferArrayRangeMigrated = 0
+----- draw smooth -----
+drawIndirect, 480
+drawIndirectCull, 480
+drawIndirectResult, 12
+nonUniformSize, 1312
+numberOfTextureHandles, 0
+numberOfTextureObjects, 2
+primvar, 1856
+singleBufferSize, 0
+textureMemory, 786432
+topology, 736
+garbageCollected = 1
+drawCalls = 2
+drawBatches = 2
+itemsDrawn = 4
+drawItemsFetched = 2
+rebuildBatches = 2
+bufferArrayRangeMigrated = 1
+----- draw flat -----
+drawIndirect, 720
+drawIndirectCull, 720
+drawIndirectResult, 20
+nonUniformSize, 1312
+numberOfTextureHandles, 0
+numberOfTextureObjects, 2
+primvar, 1856
+singleBufferSize, 0
+textureMemory, 786432
+topology, 736
+garbageCollected = 1
+drawCalls = 2
+drawBatches = 2
+itemsDrawn = 4
+drawItemsFetched = 3
+rebuildBatches = 3
+bufferArrayRangeMigrated = 1
+----- draw smooth -----
+drawIndirect, 480
+drawIndirectCull, 480
+drawIndirectResult, 20
+nonUniformSize, 1312
+numberOfTextureHandles, 0
+numberOfTextureObjects, 2
+primvar, 1856
+singleBufferSize, 0
+textureMemory, 786432
+topology, 736
+garbageCollected = 1
+drawCalls = 2
+drawBatches = 2
+itemsDrawn = 4
+drawItemsFetched = 3
+rebuildBatches = 3
+bufferArrayRangeMigrated = 1
+==== EmptyDrawBatchTest:
+----- begin -----
+nonUniformSize, 0
+numberOfTextureHandles, 0
+numberOfTextureObjects, 0
+singleBufferSize, 0
+textureMemory, 0
+garbageCollected = 0
+drawCalls = 0
+----- batched -----
+nonUniformSize, 0
+numberOfTextureHandles, 0
+numberOfTextureObjects, 0
+primvar, 0
+singleBufferSize, 0
+textureMemory, 0
+topology, 0
+garbageCollected = 0
+drawCalls = 0
+----- executed -----
+drawIndirect, 72
+drawIndirectCull, 72
+drawIndirectResult, 4
+nonUniformSize, 16
+numberOfTextureHandles, 0
+numberOfTextureObjects, 0
+primvar, 336
+singleBufferSize, 0
+textureMemory, 0
+topology, 0
+garbageCollected = 0
+drawCalls = 1
+----- clear all -----
+drawIndirect, 72
+drawIndirectCull, 72
+drawIndirectResult, 4
+nonUniformSize, 16
+numberOfTextureHandles, 0
+numberOfTextureObjects, 0
+primvar, 336
+singleBufferSize, 0
+textureMemory, 0
+topology, 0
+garbageCollected = 1
+drawCalls = 1
+
+OK

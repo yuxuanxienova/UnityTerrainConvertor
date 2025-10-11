@@ -1,0 +1,50 @@
+Loading @TrickyMultipleRelocations3/root.usda@
+
+------------------------------------------------------------------------
+Layer Stack:
+     root.usda
+
+------------------------------------------------------------------------
+Results for composing </Group>
+
+Prim Stack:
+    root.usda            /Group
+    group.usda           /Group
+
+Child names:
+     ['Subgroup']
+
+------------------------------------------------------------------------
+Results for composing </Group/Subgroup>
+
+Prim Stack:
+    root.usda            /Group/Subgroup
+    group.usda           /Group/Subgroup
+
+Child names:
+     ['Char_Renamed']
+
+Prohibited child names:
+     ['Char']
+
+------------------------------------------------------------------------
+Results for composing </Group/Subgroup/Char_Renamed>
+
+Prim Stack:
+    root.usda            /Group/Subgroup/Char_Renamed
+    group.usda           /Group/Subgroup/Char
+
+Child names:
+     ['Rig_Renamed']
+
+Prohibited child names:
+     ['Rig']
+
+------------------------------------------------------------------------
+Results for composing </Group/Subgroup/Char_Renamed/Rig_Renamed>
+
+Prim Stack:
+    group.usda           /Group/Subgroup/Char/Rig
+    group.usda           /ClassA
+    group.usda           /ClassB
+

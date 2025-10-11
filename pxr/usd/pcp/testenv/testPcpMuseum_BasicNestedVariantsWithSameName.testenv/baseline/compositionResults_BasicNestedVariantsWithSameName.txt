@@ -1,0 +1,38 @@
+Loading @BasicNestedVariantsWithSameName/root.usda@
+
+------------------------------------------------------------------------
+Layer Stack:
+     root.usda
+
+------------------------------------------------------------------------
+Results for composing </foo>
+
+Prim Stack:
+    root.usda            /foo
+    root.usda            /foo{commonName=c}
+
+Variant Selections:
+    {commonName = c}
+
+Child names:
+     ['bar']
+
+------------------------------------------------------------------------
+Results for composing </foo/bar>
+
+Prim Stack:
+    root.usda            /foo/bar
+    root.usda            /foo/bar{commonName=c}
+    root.usda            /foo{commonName=c}bar
+
+Variant Selections:
+    {commonName = c}
+
+Property names:
+     ['value']
+
+Property stacks:
+/foo/bar.value:
+    root.usda            /foo/bar.value
+    root.usda            /foo/bar{commonName=c}.value
+

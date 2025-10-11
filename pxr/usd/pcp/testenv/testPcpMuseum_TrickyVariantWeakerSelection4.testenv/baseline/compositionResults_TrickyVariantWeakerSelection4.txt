@@ -1,0 +1,61 @@
+Loading @TrickyVariantWeakerSelection4/root.usda@
+
+------------------------------------------------------------------------
+Layer Stack:
+     root.usda
+
+------------------------------------------------------------------------
+Results for composing </_class_geotype>
+
+Prim Stack:
+    root.usda            /_class_geotype
+
+------------------------------------------------------------------------
+Results for composing </bob>
+
+Prim Stack:
+    root.usda            /bob
+    root.usda            /_class_geotype
+    root.usda            /_class_geotype{geotype_selector=select_cube}
+    root.usda            /bob{geotype=cube}
+
+Variant Selections:
+    {geotype = cube}
+    {geotype_selector = select_cube}
+
+Child names:
+     ['geom']
+
+------------------------------------------------------------------------
+Results for composing </bob/geom>
+
+Prim Stack:
+    root.usda            /bob{geotype=cube}geom
+    geo.usda             /bob_root_cube
+
+Child names:
+     ['bob_body']
+
+------------------------------------------------------------------------
+Results for composing </bob/geom/bob_body>
+
+Prim Stack:
+    geo.usda             /bob_root_cube/bob_body
+
+------------------------------------------------------------------------
+Results for composing </shape>
+
+Prim Stack:
+    root.usda            /shape
+    root.usda            /bob{geotype=cube}geom
+    geo.usda             /bob_root_cube
+
+Child names:
+     ['bob_body']
+
+------------------------------------------------------------------------
+Results for composing </shape/bob_body>
+
+Prim Stack:
+    geo.usda             /bob_root_cube/bob_body
+

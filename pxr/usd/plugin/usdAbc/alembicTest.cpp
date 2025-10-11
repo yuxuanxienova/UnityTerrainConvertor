@@ -1,0 +1,349 @@
+//
+// Copyright 2016 Pixar
+//
+// Licensed under the terms set forth in the LICENSE.txt file available at
+// https://openusd.org/license.
+//
+#include "pxr/pxr.h"
+#include "pxr/usd/plugin/usdAbc/alembicTest.h"
+#include "pxr/usd/plugin/usdAbc/alembicData.h"
+#include "pxr/usd/sdf/fileFormat.h"
+#include "pxr/usd/sdf/layer.h"
+#include "pxr/usd/sdf/schema.h"
+#include "pxr/base/tf/ostreamMethods.h"
+#include <algorithm>
+#include <vector>
+
+PXR_NAMESPACE_OPEN_SCOPE
+
+
+template <class T>
+static bool _Truncate(VtValue& v, size_t max = 5)
+{
+    if (v.IsHolding<VtArray<T> >()) {
+        const VtArray<T> array = v.UncheckedGet<VtArray<T> >();
+        if (array.size() > max) {
+            VtArray<T> newArray(max);
+            std::copy(array.begin(), array.begin() + max, newArray.begin());
+            v = newArray;
+            return true;
+        }
+    }
+    return false;
+}
+
+// Wraps another visitor, feeding it specs in lexicographic order.
+class UsdAbc_SortedDataSpecVisitor : public SdfAbstractDataSpecVisitor {
+public:
+    explicit UsdAbc_SortedDataSpecVisitor(SdfAbstractDataSpecVisitor* wrapped)
+        : _visitor(wrapped) {}
+    virtual ~UsdAbc_SortedDataSpecVisitor() {}
+
+    // SdfAbstractDataSpecVisitor overrids
+    virtual bool VisitSpec(const SdfAbstractData& data,
+                           const SdfPath& path) {
+        if (_visitor)
+            _paths.push_back(path);
+        return true;
+    }
+
+    virtual void Done(const SdfAbstractData& data) {
+        if (_visitor) {
+            // Sort ids.
+            std::sort(_paths.begin(), _paths.end());
+            
+            // Pass ids to the wrapped visitor.
+            for (const auto& path : _paths) {
+                if (_Pass(data, path)) {
+                    if (!_visitor->VisitSpec(data, path)) {
+                        break;
+                    }
+                }
+            }
+            
+            // Finish up.
+            _visitor->Done(data);
+            _paths.clear();
+        }
+    }
+
+protected:
+    /// Iff this returns \c true, \p id is passed to the wrapped visitor.
+    /// The default returns \c true.
+    virtual bool _Pass(const SdfAbstractData& data,
+                       const SdfPath& id) {
+        return true;
+    }        
+
+private:
+    SdfAbstractDataSpecVisitor* _visitor;
+
+    typedef std::vector<SdfPath> _Paths;
+    _Paths _paths;
+};
+
+
+
+// Note that this works because the Alembic data visits in hierarchy order.
+struct UsdAbc_AlembicWriteVisitor : public SdfAbstractDataSpecVisitor {
+    virtual bool VisitSpec(const SdfAbstractData& data, 
+                           const SdfPath& path)
+    {
+        if (path == SdfPath::AbsoluteRootPath()) {
+            // Ignore.
+        }
+        else {
+            fprintf(stdout, "%*s", 2*int(path.GetPathElementCount()-1), "");
+            if (path.IsPropertyPath()) {
+                VtValue custom = data.Get(path, SdfFieldKeys->Custom);
+                if (custom.IsHolding<bool>()) {
+                    fprintf(stdout, "%s",
+                            custom.UncheckedGet<bool>() ? "custom " : "");
+                }
+                else if (!custom.IsEmpty()) {
+                    fprintf(stdout, "!BAD_CUSTOM ");
+                }
+
+                VtValue typeName = data.Get(path, SdfFieldKeys->TypeName);
+                if (typeName.IsHolding<TfToken>()) {
+                    fprintf(stdout, "%s ", TfStringify(typeName).c_str());
+                }
+                else if (!typeName.IsEmpty()) {
+                    fprintf(stdout, "!BAD_TYPE ");
+                }
+
+                fprintf(stdout, "%s", path.GetName().c_str());
+
+                VtValue value = data.Get(path, SdfFieldKeys->Default);
+                if (!value.IsEmpty()) {
+                    // Truncate shaped types to not dump too much data.
+                    const char* trailing = NULL;
+                    if (value.IsArrayValued()) {
+                        if (_Truncate<bool>(value) ||
+                            _Truncate<double>(value) ||
+                            _Truncate<float>(value) ||
+                            _Truncate<GfMatrix2d>(value) ||
+                            _Truncate<GfMatrix3d>(value) ||
+                            _Truncate<GfMatrix4d>(value) ||
+                            _Truncate<GfVec2d>(value) ||
+                            _Truncate<GfVec2f>(value) ||
+                            _Truncate<GfVec2i>(value) ||
+                            _Truncate<GfVec3d>(value) ||
+                            _Truncate<GfVec3f>(value) ||
+                            _Truncate<GfVec3i>(value) ||
+                            _Truncate<GfVec4d>(value) ||
+                            _Truncate<GfVec4f>(value) ||
+                            _Truncate<GfVec4i>(value) ||
+                            _Truncate<int>(value) ||
+                            _Truncate<SdfAssetPath>(value) ||
+                            _Truncate<std::string>(value) ||
+                            _Truncate<TfToken>(value)) {
+                            trailing = "...";
+                        }
+                    }
+                    std::string s = TfStringify(value);
+                    if (trailing) {
+                        s.insert(s.size() - 1, trailing);
+                    }
+                    if (value.IsHolding<std::string>()) {
+                        s = '"' + s + '"';
+                    }
+                    fprintf(stdout, " = %s\n", s.c_str());
+                }
+
+                VtValue samples = data.Get(path, SdfFieldKeys->TimeSamples);
+                std::set<double> times = data.ListTimeSamplesForPath(path);
+                if (samples.IsEmpty()) {
+                    if (times.size() <= 1) {
+                        // Expected.
+                    }
+                    else {
+                        fprintf(stdout, "%*s",
+                                2*int(path.GetPathElementCount()-1), "");
+                        fprintf(stdout, "!NO_SAMPLES, want %zd\n",
+                                times.size());
+                    }
+                }
+                else if (samples.IsHolding<SdfTimeSampleMap>()) {
+                    const SdfTimeSampleMap& samplesMap =
+                        samples.UncheckedGet<SdfTimeSampleMap>();
+                    if (times.size() != samplesMap.size()) {
+                        fprintf(stdout, "%*s",
+                                2*int(path.GetPathElementCount()-1), "");
+                        fprintf(stdout, "!SAMPLES_MISMATCH, "
+                                "have %zd vs want %zd\n",
+                                samplesMap.size(), times.size());
+                    }
+                    else {
+                        // XXX: Should compare times in samplesMap and
+                        //      times.
+                        fprintf(stdout, "%*s",
+                                2*int(path.GetPathElementCount()-1), "");
+                        fprintf(stdout, "samples_at=[ ");
+                        for (double t : times) {
+                            fprintf(stdout, "%g ", t);
+                        }
+                        fprintf(stdout, "]\n");
+                    }
+                }
+                else {
+                    fprintf(stdout, "%*s",
+                            2*int(path.GetPathElementCount()-1), "");
+                    fprintf(stdout, "!BAD_SAMPLES\n");
+                }
+
+                // Write other fields.
+                TfTokenVector tmp = data.List(path);
+                std::set<TfToken> tokens(tmp.begin(), tmp.end());
+                tokens.erase(SdfFieldKeys->Custom);
+                tokens.erase(SdfFieldKeys->TypeName);
+                tokens.erase(SdfFieldKeys->Default);
+                tokens.erase(SdfFieldKeys->TimeSamples);
+                const SdfSchema& schema = SdfSchema::GetInstance();
+                for (const auto& field : tokens) {
+                    const VtValue value = data.Get(path, field);
+                    if (value != schema.GetFallback(field)) {
+                        fprintf(stdout, "%*s# %s = %s\n",
+                                2*int(path.GetPathElementCount()-1), "",
+                                field.GetText(),
+                                TfStringify(value).c_str());
+                    }
+                }
+            }
+            else {
+                VtValue specifier = data.Get(path, SdfFieldKeys->Specifier);
+                if (specifier.IsHolding<SdfSpecifier>()) {
+                    static const char* spec[] = { "def", "over", "class" };
+                    fprintf(stdout, "%s ",
+                            spec[specifier.UncheckedGet<SdfSpecifier>()]);
+                }
+                else {
+                    fprintf(stdout, "!BAD_SPEC ");
+                }
+
+                VtValue typeName = data.Get(path, SdfFieldKeys->TypeName);
+                if (typeName.IsHolding<TfToken>()) {
+                    fprintf(stdout, "%s ", TfStringify(typeName).c_str());
+                }
+                else if (!typeName.IsEmpty()) {
+                    fprintf(stdout, "!BAD_TYPE ");
+                }
+
+                fprintf(stdout, "%s\n", path.GetName().c_str());
+            }
+        }
+        return true;
+    }
+
+    virtual void Done(const SdfAbstractData&)
+    {
+        // Do nothing
+    }
+};
+
+static void UsdAbc_PrintTimes(const char* msg, const std::set<double>& times)
+{
+    fprintf(stdout, "%s: [", msg);
+    for (double t : times) {
+        fprintf(stdout, " %f", t);
+    }
+    fprintf(stdout, " ]\n");
+}
+
+struct UsdAbc_AlembicTimeVisitor : public SdfAbstractDataSpecVisitor {
+    virtual bool VisitSpec(const SdfAbstractData& data, 
+                           const SdfPath& path)
+    {
+        if (path.IsPropertyPath()) {
+            UsdAbc_PrintTimes(path.GetText(),
+                              data.ListTimeSamplesForPath(path));
+        }
+        return true;
+    }
+
+    virtual void Done(const SdfAbstractData&)
+    {
+        // Do nothing
+    }
+};
+
+bool
+UsdAbc_TestAlembic(const std::string& pathname)
+{
+    if (UsdAbc_AlembicDataRefPtr data = UsdAbc_AlembicData::New()) {
+        if (data->Open(pathname)) {
+            // Dump prims and properties.
+            fprintf(stdout, "\nWrite:\n");
+            UsdAbc_AlembicWriteVisitor writeVisitor;
+            UsdAbc_SortedDataSpecVisitor sortWrite(&writeVisitor);
+            data->VisitSpecs(&sortWrite);
+
+/*
+            // Time samples.
+            fprintf(stdout, "\nTime samples:\n");
+            UsdAbc_AlembicTimeVisitor timeVisitor;
+            UsdAbc_SortedDataSpecVisitor sortTime(&timeVisitor);
+            data->VisitSpecs(&sortTime);
+            UsdAbc_PrintTimes("all", data->ListAllTimeSamples());
+*/
+
+            // Dump all time samples of a particular property.  This is
+            // intended for the standard Alembic octopus file.
+            SdfPath path("/octopus_low/octopus_lowShape.extent");
+            std::set<double> times = data->ListTimeSamplesForPath(path);
+            if (!times.empty()) {
+                fprintf(stdout, "\nExtent samples:\n");
+                for (double t : times) {
+                    VtValue value;
+                    if (data->QueryTimeSample(path, t, &value)) {
+                        fprintf(stdout, "  %f: %s\n",
+                                t, TfStringify(value).c_str());
+                    }
+                    else {
+                        fprintf(stdout, "  %f: <no value>\n", t);
+                    }
+                }
+
+                // Verify no samples at times not listed.
+                if (times.size() > 1) {
+                    double t      = floor(*times.begin());
+                    double tUpper = ceil(*times.rbegin());
+                    for (; t <= tUpper; t += 1.0) {
+                        if (times.find(t) == times.end()) {
+                            if (data->QueryTimeSample(path, t, (VtValue*)NULL)) {
+                                fprintf(stdout, "  %f: <expected sample>\n", t);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+        else {
+            fprintf(stderr, "Can't open Alembic file \"%s\"\n", pathname.c_str());
+        }
+    }
+    else {
+        fprintf(stderr, "Can't create Alembic data\n");
+    }
+    return false;
+}
+
+bool
+UsdAbc_WriteAlembic(const std::string& srcPathname, const std::string& dstPathname)
+{
+    SdfLayerRefPtr layer = SdfLayer::OpenAsAnonymous(srcPathname);
+    if (!layer) {
+        fprintf(stderr, "Can't open '%s'\n", srcPathname.c_str());
+        return false;
+    }
+
+    // Write the file back out in the cwd.
+    return
+        SdfFileFormat::FindByExtension(".abc")->
+            WriteToFile(*get_pointer(layer), dstPathname);
+}
+
+PXR_NAMESPACE_CLOSE_SCOPE
+

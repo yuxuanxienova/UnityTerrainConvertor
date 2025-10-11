@@ -1,0 +1,31 @@
+#usda 1.0
+
+class "APIIdentifierMissingAPI" (
+    customData = {
+        token[] apiSchemaAutoApplyTo = ["SomeConcreteType", "SomeAbstractType"]
+        string apiSchemaType = "singleApply"
+    }
+    inherits = </APISchemaBase>
+)
+{
+    reorder properties = ["inputs:intensity", "outputs:resultRGB"]
+    float inputs:intensity = 1 (
+        connectability = "interfaceOnly"
+        customData = {
+            string userDoc = """
+                intensity: Itensity of the flame thrower.
+                """
+            string userDocBrief = """
+                intensity: Itensity of the flame thrower.
+                """
+        }
+        displayGroup = "Basic"
+        displayName = "Intensity"
+        uiHints = {
+            string displayGroup = "Basic"
+            string displayName = "Intensity"
+        }
+    )
+    color3f outputs:resultRGB
+}
+

@@ -1,0 +1,32 @@
+Loading @SubrootReferenceAndVariants2/root.usda@
+
+------------------------------------------------------------------------
+Layer Stack:
+     root.usda
+
+------------------------------------------------------------------------
+Results for composing </Inherit>
+
+Prim Stack:
+    root.usda            /Inherit
+
+Child names:
+     ['CHARACTER']
+
+------------------------------------------------------------------------
+Results for composing </Inherit/CHARACTER>
+
+Prim Stack:
+    root.usda            /Inherit/CHARACTER
+
+------------------------------------------------------------------------
+Results for composing </Character>
+
+Prim Stack:
+    root.usda            /Character
+    root.usda            /Inherit/CHARACTER
+    CharGroup.usda       /CHARGROUP/CHARACTER
+    CharGroup.usda       /CHARGROUP{v=x}CHARACTER
+    CharGroup.usda       /Ref/CHARACTER
+    CharGroup.usda       /Inherit/CHARACTER
+

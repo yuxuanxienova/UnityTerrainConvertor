@@ -1,0 +1,106 @@
+------------------------------------------------------------------------
+Errors while composing </GroupRoot>
+
+Cycle detected:
+@ErrorArcCycle/root.usda@</GroupRoot>
+references:
+@ErrorArcCycle/A.usda@</GroupA>
+which references:
+@ErrorArcCycle/B.usda@</GroupB>
+which CANNOT reference:
+@ErrorArcCycle/A.usda@</GroupA>
+
+
+------------------------------------------------------------------------
+Errors while composing </Parent/Child1>
+
+Cycle detected:
+@ErrorArcCycle/root.usda@</Parent/Child1>
+inherits from:
+@ErrorArcCycle/root.usda@</Parent/Child2>
+which CANNOT inherit from:
+@ErrorArcCycle/root.usda@</Parent/Child1>
+
+
+------------------------------------------------------------------------
+Errors while composing </Parent/Child2>
+
+Cycle detected:
+@ErrorArcCycle/root.usda@</Parent/Child2>
+inherits from:
+@ErrorArcCycle/root.usda@</Parent/Child1>
+which CANNOT inherit from:
+@ErrorArcCycle/root.usda@</Parent/Child2>
+
+
+------------------------------------------------------------------------
+Errors while composing </AnotherParent/AnotherChild>
+
+Cycle detected:
+@ErrorArcCycle/root.usda@</AnotherParent/AnotherChild>
+references:
+@ErrorArcCycle/model.usda@</Model>
+which CANNOT reference:
+@ErrorArcCycle/root.usda@</AnotherParent>
+
+
+------------------------------------------------------------------------
+Errors while composing </YetAnotherParent/Child>
+
+Cycle detected:
+@ErrorArcCycle/root.usda@</YetAnotherParent/Child>
+CANNOT inherit from:
+@ErrorArcCycle/root.usda@</YetAnotherParent>
+
+
+------------------------------------------------------------------------
+Errors while composing </CoRecursiveParent1/Child1/Child2>
+
+Cycle detected:
+@ErrorArcCycle/root.usda@</CoRecursiveParent1/Child1/Child2>
+inherits from:
+@ErrorArcCycle/root.usda@</CoRecursiveParent2/Child2>
+which CANNOT inherit from:
+@ErrorArcCycle/root.usda@</CoRecursiveParent1>
+
+
+------------------------------------------------------------------------
+Errors while composing </CoRecursiveParent2/Child2/Child1>
+
+Cycle detected:
+@ErrorArcCycle/root.usda@</CoRecursiveParent2/Child2/Child1>
+inherits from:
+@ErrorArcCycle/root.usda@</CoRecursiveParent1/Child1>
+which CANNOT inherit from:
+@ErrorArcCycle/root.usda@</CoRecursiveParent2>
+
+
+------------------------------------------------------------------------
+Errors while composing </InheritOfChild>
+
+Cycle detected:
+@ErrorArcCycle/root.usda@</InheritOfChild>
+CANNOT inherit from:
+@ErrorArcCycle/root.usda@</InheritOfChild/Child>
+
+
+------------------------------------------------------------------------
+Errors while composing </RelocatedInheritOfChild/Object>
+
+Cycle detected:
+@ErrorArcCycle/root.usda@</RelocatedInheritOfChild/Object>
+is relocated from:
+@ErrorArcCycle/root.usda@</RelocatedInheritOfChild/Child>
+which CANNOT inherit from:
+@ErrorArcCycle/root.usda@</RelocatedInheritOfChild/Child/Class>
+
+
+------------------------------------------------------------------------
+Errors while composing </RelocatedInheritOfChild/Child>
+
+Cycle detected:
+@ErrorArcCycle/root.usda@</RelocatedInheritOfChild/Child>
+CANNOT inherit from:
+@ErrorArcCycle/root.usda@</RelocatedInheritOfChild/Child/Class>
+
+

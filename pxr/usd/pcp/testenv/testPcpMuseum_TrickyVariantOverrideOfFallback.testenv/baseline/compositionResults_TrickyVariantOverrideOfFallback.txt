@@ -1,0 +1,68 @@
+Loading @TrickyVariantOverrideOfFallback/root.usda@
+
+------------------------------------------------------------------------
+Layer Stack:
+     root.usda
+
+------------------------------------------------------------------------
+Results for composing </A>
+
+Prim Stack:
+    root.usda            /A
+    root.usda            /A{vset1=selection}
+    root.usda            /B
+    root.usda            /B{vset2=selection}
+
+Variant Selections:
+    {vset1 = selection}
+    {vset2 = selection}
+
+Child names:
+     ['Child']
+
+Property names:
+     ['result']
+
+Property stacks:
+/A.result:
+    root.usda            /A{vset1=selection}.result
+
+------------------------------------------------------------------------
+Results for composing </A/Child>
+
+Prim Stack:
+    root.usda            /A/Child
+    root.usda            /A{vset1=selection}Child
+    root.usda            /B/Child
+    root.usda            /B{vset2=selection}Child
+
+------------------------------------------------------------------------
+Results for composing </B>
+
+Prim Stack:
+    root.usda            /B
+    root.usda            /B{vset2=selection}
+
+Variant Selections:
+    {vset2 = selection}
+
+Child names:
+     ['Child']
+
+------------------------------------------------------------------------
+Results for composing </B/Child>
+
+Prim Stack:
+    root.usda            /B/Child
+    root.usda            /B{vset2=selection}Child
+
+------------------------------------------------------------------------
+Results for composing </C>
+
+Prim Stack:
+    root.usda            /C
+    root.usda            /A/Child
+    root.usda            /A{vset1=selection}Child
+    root.usda            /B/Child
+    root.usda            /B{vset2=selection}Child
+

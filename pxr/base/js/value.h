@@ -1,0 +1,345 @@
+//
+// Copyright 2016 Pixar
+//
+// Licensed under the terms set forth in the LICENSE.txt file available at
+// https://openusd.org/license.
+//
+#ifndef PXR_BASE_JS_VALUE_H
+#define PXR_BASE_JS_VALUE_H
+
+/// \file js/value.h
+
+#include "pxr/pxr.h"
+#include "pxr/base/js/api.h"
+#include "pxr/base/js/types.h"
+#include "pxr/base/tf/delegatedCountPtr.h"
+
+#include <algorithm>
+#include <atomic>
+#include <cstdint>
+#include <string>
+#include <type_traits>
+#include <variant>
+#include <vector>
+
+PXR_NAMESPACE_OPEN_SCOPE
+
+// Value API Version
+// 1 (or undefined) - Initial version.
+// 2 - Changed Get{Array,Object} to GetJs{Array,Object}.
+#define JS_VALUE_API_VERSION 2
+
+/// \class JsValue
+///
+/// A discriminated union type for JSON values. A JsValue may contain one of
+/// the following types:
+///
+/// \li JsObject, a dictionary type
+/// \li JsArray, a vector type
+/// \li std::string
+/// \li bool
+/// \li int64_t
+/// \li uint64_t
+/// \li double
+/// \li null
+///
+class JsValue
+{
+public:
+    /// Type held by this JSON value.
+    enum Type {
+        ObjectType,
+        ArrayType,
+        StringType,
+        BoolType,
+        IntType,
+        RealType,
+        NullType
+    };
+
+    /// Constructs a null value.
+    JS_API JsValue();
+
+    /// Constructs a value holding the given object.
+    JS_API JsValue(const JsObject& value);
+
+    /// Constructs a value holding the given object rvalue reference.
+    JS_API JsValue(JsObject&& value);
+
+    /// Constructs a value holding the given array.
+    JS_API JsValue(const JsArray& value);
+
+    /// Constructs a value holding the given array rvalue reference.
+    JS_API JsValue(JsArray&& value);
+
+    /// Constructs a value holding the given char array as a std::string.
+    JS_API explicit JsValue(const char* value);
+
+    /// Constructs a value holding the given std::string.
+    JS_API explicit JsValue(const std::string& value);
+
+    /// Constructs a value holding the given std::string rvalue reference.
+    JS_API explicit JsValue(std::string&& value);
+
+    /// Constructs a value holding a bool.
+    JS_API explicit JsValue(bool value);
+
+    /// Constructs a value holding a signed integer.
+    JS_API explicit JsValue(int value);
+
+    /// Constructs a value holding a 64-bit signed integer.
+    JS_API explicit JsValue(int64_t value);
+
+    /// Constructs a value holding a 64-bit unsigned integer.
+    JS_API explicit JsValue(uint64_t value);
+
+    /// Constructs a value holding a double.
+    JS_API explicit JsValue(double value);
+
+    /// Returns the object held by this value. If this value is not holding an
+    /// object, this method raises a coding error and an empty object is
+    /// returned.
+    JS_API const JsObject& GetJsObject() const;
+
+    /// Returns the array held by this value. If this value is not holding an
+    /// array, this method raises a coding error and an empty array is
+    /// returned.
+    JS_API const JsArray& GetJsArray() const;
+
+    /// Returns the string held by this value. If this value is not holding a
+    /// string, this method raises a coding error and an empty string is
+    /// returned.
+    JS_API const std::string& GetString() const;
+
+    /// Returns the bool held by this value. If this value is not holding a
+    /// bool, this method raises a coding error and false is returned.
+    JS_API bool GetBool() const;
+
+    /// Returns the integer held by this value. If this value is not holding
+    /// an int, this method raises a coding error and zero is returned. If the
+    /// value is holding a 64-bit integer larger than the platform int may
+    /// hold, the value is truncated.
+    JS_API int GetInt() const;
+
+    /// Returns the 64-bit integer held by this value. If this value is not
+    /// holding a 64-bit integer, this method raises a coding error and zero
+    /// is returned.
+    JS_API int64_t GetInt64() const;
+
+    /// Returns the 64-bit unsigned integer held by this value. If this value
+    /// is not holding a 64-bit unsigned integer, this method raises a coding
+    /// error and zero is returned.
+    JS_API uint64_t GetUInt64() const;
+
+    /// Returns the double held by this value. If this value is not holding a
+    /// double, this method raises a coding error and zero is returned.
+    JS_API double GetReal() const;
+
+    /// Returns the value corresponding to the C++ type specified in the
+    /// template parameter if it is holding such a value. Calling this
+    /// function with C++ type T is equivalent to calling the specific Get
+    /// function above that returns a value or reference to a type T.
+    ///
+    /// If a value corresponding to the C++ type is not being held, this
+    /// method raises a coding error. See Get functions above for default
+    /// value returned in this case.
+    template <typename T,
+              typename ReturnType = typename std::conditional<
+                  std::is_same<T, JsObject>::value || 
+                  std::is_same<T, JsArray>::value || 
+                  std::is_same<T, std::string>::value,
+                  const T&, T>::type>
+    ReturnType Get() const {
+        return _Get(static_cast<T*>(nullptr));
+    }
+
+    /// Returns a vector holding the elements of this value's array that
+    /// correspond to the C++ type specified as the template parameter. 
+    /// If this value is not holding an array, an empty vector is returned. 
+    /// If any of the array's elements does not correspond to the C++ type, 
+    /// it is replaced with the default value used by the Get functions above. 
+    /// In both cases, a coding error will be raised.
+    template <typename T>
+    std::vector<T> GetArrayOf() const;
+
+    /// Returns the type of this value.
+    JS_API Type GetType() const;
+
+    /// Returns a display name for the type of this value.
+    JS_API std::string GetTypeName() const;
+
+    /// Returns true if this value is holding an object type.
+    JS_API bool IsObject() const;
+
+    /// Returns true if this value is holding an array type.
+    JS_API bool IsArray() const;
+
+    /// Returns true if this value is holding a string type.
+    JS_API bool IsString() const;
+
+    /// Returns true if this value is holding a boolean type.
+    JS_API bool IsBool() const;
+
+    /// Returns true if this value is holding an integer type.
+    JS_API bool IsInt() const;
+
+    /// Returns true if this value is holding a real type.
+    JS_API bool IsReal() const;
+
+    /// Returns true if this value is holding a 64-bit unsigned integer.
+    JS_API bool IsUInt64() const;
+
+    /// Returns true if this value is holding a type that corresponds
+    /// to the C++ type specified as the template parameter.
+    template <typename T>
+    bool Is() const {
+        return _Is(static_cast<T*>(nullptr));
+    }
+
+    /// Returns true if this value is holding an array whose elements all
+    /// correspond to the C++ type specified as the template parameter.
+    template <typename T>
+    bool IsArrayOf() const;
+
+    /// Returns true if this value is null, false otherwise.
+    JS_API bool IsNull() const;
+
+    /// Evaluates to true if this value is not null.
+    JS_API explicit operator bool() const;
+
+    /// Returns true of both values hold the same type and the underlying held
+    /// values are equal.
+    JS_API bool operator==(const JsValue& other) const;
+
+    /// Returns true if values are of different type, or the underlying held
+    /// values are not equal.
+    JS_API bool operator!=(const JsValue& other) const;
+
+    /// Swap the value held by \p lhs with the value held by \p rhs.
+    friend void swap(JsValue& lhs, JsValue& rhs) {
+        lhs._value.swap(rhs._value);
+    }
+
+private:
+    template <typename T> 
+    struct _InvalidTypeHelper : public std::false_type { };
+
+    template <class T>
+    T _Get(T*) const {
+        static_assert(_InvalidTypeHelper<T>::value, 
+                      "Invalid type for JsValue");
+        return T();
+    }
+
+    const JsObject& _Get(JsObject*) const { return GetJsObject(); }
+    const JsArray& _Get(JsArray*) const { return GetJsArray(); }
+    const std::string& _Get(std::string*) const { return GetString(); }
+    bool _Get(bool*) const { return GetBool(); }
+    int _Get(int*) const { return GetInt(); }
+    int64_t _Get(int64_t*) const { return GetInt64(); }
+    uint64_t _Get(uint64_t*) const { return GetUInt64(); }
+    double _Get(double*) const { return GetReal(); }
+
+    template <class T>
+    bool _Is(T*) const {
+        static_assert(_InvalidTypeHelper<T>::value, 
+                      "Invalid type for JsValue");
+        return false;
+    }
+
+    bool _Is(JsObject*) const { return IsObject(); }
+    bool _Is(JsArray*) const { return IsArray(); }
+    bool _Is(std::string*) const { return IsString(); }
+    bool _Is(bool*) const { return IsBool(); }
+    bool _Is(int*) const { return IsInt(); }
+    bool _Is(int64_t*) const { return IsInt(); }
+    bool _Is(uint64_t*) const { return IsUInt64(); }
+    bool _Is(double*) const { return IsReal(); }
+
+    // Base class for types held indirectly.
+    //
+    // JsValue holds objects, arrays and strings indirectly.  This serves two
+    // purposes.  First, JsValue holds JsObject, which holds JsValues so
+    // indirection avoids needing JsValue to be complete while defining
+    // JsValue.  Second, along with std::string, values of these types can be
+    // expensive to copy so they are reference counted instead.
+    //
+    // The template argument E is used to distinguish the holders in the
+    // JsValue's variant.
+    template <enum Type EnumValue>
+    struct _HolderBase
+    {
+    protected:
+        _HolderBase() = default;
+        ~_HolderBase() = default;
+
+    private:
+        friend void TfDelegatedCountIncrement(const _HolderBase *h) noexcept {
+            h->_refCount.fetch_add(1, std::memory_order_relaxed);
+        }
+
+        friend void TfDelegatedCountDecrement(const _HolderBase *h) noexcept {
+            const int rc = h->_refCount.fetch_sub(1, std::memory_order_release);
+            if (rc == 1) {
+                std::atomic_thread_fence(std::memory_order_acquire);
+                _Delete(h);
+            }
+        }
+
+        static JS_API void _Delete(const _HolderBase *) noexcept;
+
+    private:
+        mutable std::atomic<int> _refCount = 1;
+    };
+
+    template <typename> struct _Holder;
+    struct _IsValueEqualVisitor;
+
+    // A sentinel type held by default constructed JsValue objects, which
+    // corresponds to JSON 'null'.
+    struct _JsNull
+    {
+        bool operator==(const _JsNull& v) const {
+            return true;
+        }
+        bool operator!=(const _JsNull& v) const {
+            return false;
+        }
+    };
+
+    // The order these types are defined in the variant must match the
+    // order in which Type enumerators are defined.  uint64_t is
+    // handled as a special case in the implementation.
+    using _Variant = std::variant<
+        TfDelegatedCountPtr<_HolderBase<ObjectType>>,
+        TfDelegatedCountPtr<_HolderBase<ArrayType>>,
+        TfDelegatedCountPtr<_HolderBase<StringType>>,
+        bool, int64_t, double, _JsNull, uint64_t>;
+
+    _Variant _value;
+};
+
+template <typename T>
+inline std::vector<T> JsValue::GetArrayOf() const
+{
+    const JsArray& array = GetJsArray();
+    std::vector<T> result(array.size());
+    std::transform(array.begin(), array.end(), result.begin(),
+                   [](const JsValue& v) { return v.Get<T>(); });
+    return result;
+}
+
+template <typename T>
+inline bool JsValue::IsArrayOf() const 
+{
+    if (!IsArray()) {
+        return false;
+    }
+    const JsArray& array = GetJsArray();
+    return std::all_of(array.begin(), array.end(),
+                       [](const JsValue& v) { return v.Is<T>(); });
+}
+
+PXR_NAMESPACE_CLOSE_SCOPE
+
+#endif // PXR_BASE_JS_VALUE_H

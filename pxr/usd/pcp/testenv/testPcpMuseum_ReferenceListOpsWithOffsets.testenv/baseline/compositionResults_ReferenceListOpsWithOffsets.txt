@@ -1,0 +1,77 @@
+Loading @ReferenceListOpsWithOffsets/root.usda@
+
+------------------------------------------------------------------------
+Layer Stack:
+     root.usda
+     sub.usda
+     sub_48tcps.usda
+     base.usda
+
+------------------------------------------------------------------------
+Results for composing </AddRefs1>
+
+Prim Stack:
+    sub.usda             /AddRefs1
+    base.usda            /AddRefs1
+    ref.usda             /Ref
+    ref.usda             /Ref
+    ref.usda             /Ref
+    ref.usda             /Ref
+
+Time Offsets:
+    root.usda            /AddRefs1       root       (offset=0.00, scale=1.00)
+        sub.usda                         sublayer   (offset=10.00, scale=2.00)
+        sub_48tcps.usda                  sublayer   (offset=0.00, scale=0.50)
+    ref.usda             /Ref            reference  (offset=100.00, scale=1.00)
+    ref.usda             /Ref            reference  (offset=30.00, scale=4.00)
+    ref.usda             /Ref            reference  (offset=100.00, scale=1.00)
+    ref.usda             /Ref            reference  (offset=10.00, scale=2.00)
+
+------------------------------------------------------------------------
+Results for composing </DeleteRefs1>
+
+Prim Stack:
+    sub.usda             /DeleteRefs1
+    base.usda            /DeleteRefs1
+    ref.usda             /Ref
+
+Time Offsets:
+    root.usda            /DeleteRefs1    root       (offset=0.00, scale=1.00)
+        sub.usda                         sublayer   (offset=10.00, scale=2.00)
+        sub_48tcps.usda                  sublayer   (offset=0.00, scale=0.50)
+    ref.usda             /Ref            reference  (offset=100.00, scale=1.00)
+
+------------------------------------------------------------------------
+Results for composing </AddRefs2>
+
+Prim Stack:
+    sub_48tcps.usda      /AddRefs2
+    base.usda            /AddRefs2
+    ref.usda             /Ref
+    ref.usda             /Ref
+    ref.usda             /Ref
+    ref.usda             /Ref
+
+Time Offsets:
+    root.usda            /AddRefs2       root       (offset=0.00, scale=1.00)
+        sub.usda                         sublayer   (offset=10.00, scale=2.00)
+        sub_48tcps.usda                  sublayer   (offset=0.00, scale=0.50)
+    ref.usda             /Ref            reference  (offset=100.00, scale=1.00)
+    ref.usda             /Ref            reference  (offset=5.00, scale=2.00)
+    ref.usda             /Ref            reference  (offset=100.00, scale=1.00)
+    ref.usda             /Ref            reference  (offset=0.00, scale=1.00)
+
+------------------------------------------------------------------------
+Results for composing </DeleteRefs2>
+
+Prim Stack:
+    sub_48tcps.usda      /DeleteRefs2
+    base.usda            /DeleteRefs2
+    ref.usda             /Ref
+
+Time Offsets:
+    root.usda            /DeleteRefs2    root       (offset=0.00, scale=1.00)
+        sub.usda                         sublayer   (offset=10.00, scale=2.00)
+        sub_48tcps.usda                  sublayer   (offset=0.00, scale=0.50)
+    ref.usda             /Ref            reference  (offset=100.00, scale=1.00)
+

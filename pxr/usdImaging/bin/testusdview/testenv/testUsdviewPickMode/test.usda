@@ -1,0 +1,67 @@
+#usda 1.0
+
+def Xform "ProtoRed"
+{
+    token visibility = "invisible"
+
+    def Cube "cube"
+    {
+        color3f[] primvars:displayColor = [(1, 0, 0)]
+    }
+}
+
+def Xform "ProtoGreen"
+{
+    token visibility = "invisible"
+
+    def Cube "cube"
+    {
+        color3f[] primvars:displayColor = [(0, 1, 0)]
+    }
+}
+
+def Xform "Foo" (
+    kind = "model"
+)
+{
+    def Xform "Cube"
+    {
+        def PointInstancer "Instancer"
+        {
+            float3[] extent = [(-1, -1, -1), (1, 6, 1)]
+            point3f[] positions = [(0, 0, 0), (0, 2.5, 0), (0, 5, 0)]
+            int[] protoIndices = [0, 1, 1]
+            rel prototypes = [
+                </Foo/Cube/Instancer/Protos/Proto1>,
+                </Foo/Cube/Instancer/Protos/Proto2>,
+            ]
+
+            def "Protos"
+            {
+                def "Proto1" (
+                    references = </ProtoRed>
+                )
+                {
+                    token visibility = "visible"
+                }
+
+                def Xform "Proto2" (
+                    references = </ProtoGreen>
+                )
+                {
+                    token visibility = "visible"
+                }
+            }
+        }
+    }
+
+    def Xform "Cube2" (
+        references = </Foo/Cube>
+        instanceable = true
+    )
+    {
+        double3 xformOp:translate = (2.5, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+}
+

@@ -1,0 +1,1 @@
+Error: parse error at bad-mismatchedBraces.json:7:1: Missing a comma or '}' after an object member.

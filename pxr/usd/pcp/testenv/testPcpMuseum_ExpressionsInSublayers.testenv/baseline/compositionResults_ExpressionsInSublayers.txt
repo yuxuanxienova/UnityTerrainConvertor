@@ -1,0 +1,28 @@
+Loading session @ExpressionsInSublayers/session.usda@
+
+Loading @ExpressionsInSublayers/root.usda@
+
+------------------------------------------------------------------------
+Layer Stack:
+     session.usda
+     A_session.usda
+     C_session.usda
+     B_session.usda
+     root.usda
+     A.usda
+     C.usda
+     B.usda
+
+------------------------------------------------------------------------
+Results for composing </Root>
+
+Prim Stack:
+    session.usda         /Root
+    A_session.usda       /Root
+    C_session.usda       /Root
+    B_session.usda       /Root
+    root.usda            /Root
+    A.usda               /Root
+    C.usda               /Root
+    B.usda               /Root
+

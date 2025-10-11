@@ -1,0 +1,28 @@
+//
+// Copyright 2016 Pixar
+//
+// Licensed under the terms set forth in the LICENSE.txt file available at
+// https://openusd.org/license.
+//
+#include "pxr/imaging/hdSt/tokens.h"
+
+PXR_NAMESPACE_OPEN_SCOPE
+
+TF_DEFINE_PUBLIC_TOKENS(HdStGLSLProgramTokens, HDST_GLSL_PROGRAM_TOKENS);
+
+TF_DEFINE_PUBLIC_TOKENS(HdStTokens, HDST_TOKENS);
+
+TF_DEFINE_PUBLIC_TOKENS(HdStTextureTokens, HDST_TEXTURE_TOKENS);
+
+TF_DEFINE_PUBLIC_TOKENS(HdStRenderBufferTokens, HDST_RENDER_BUFFER_TOKENS);
+
+TF_DEFINE_PUBLIC_TOKENS(HdStRenderSettingsTokens, HDST_RENDER_SETTINGS_TOKENS);
+
+TF_DEFINE_PUBLIC_TOKENS(HdStMaterialTagTokens, HDST_MATERIAL_TAG_TOKENS);
+
+TF_DEFINE_PUBLIC_TOKENS(HdStSdrMetadataTokens, HDST_SDR_METADATA_TOKENS);
+
+TF_DEFINE_PUBLIC_TOKENS(HdStPerfTokens, HDST_PERF_TOKENS);
+
+PXR_NAMESPACE_CLOSE_SCOPE
+

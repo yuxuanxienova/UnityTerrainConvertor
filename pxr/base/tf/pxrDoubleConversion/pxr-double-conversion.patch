@@ -1,0 +1,478 @@
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/bignum.cc ./pxrDoubleConversion/bignum.cc
+--- ./double-conversion/bignum.cc	2024-01-19 13:29:18.303774089 -0800
++++ ./pxrDoubleConversion/bignum.cc	2024-01-21 20:55:47.523362191 -0800
+@@ -31,7 +31,11 @@
+ #include "bignum.h"
+ #include "utils.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ Bignum::Chunk& Bignum::RawBigit(const int index) {
+   DOUBLE_CONVERSION_ASSERT(static_cast<unsigned>(index) < kBigitCapacity);
+@@ -794,4 +798,6 @@
+ }
+ 
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/bignum-dtoa.cc ./pxrDoubleConversion/bignum-dtoa.cc
+--- ./double-conversion/bignum-dtoa.cc	2024-01-19 13:29:18.289060739 -0800
++++ ./pxrDoubleConversion/bignum-dtoa.cc	2024-01-21 20:55:47.617355651 -0800
+@@ -32,7 +32,11 @@
+ #include "bignum.h"
+ #include "ieee.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ static int NormalizedExponent(uint64_t significand, int exponent) {
+   DOUBLE_CONVERSION_ASSERT(significand != 0);
+@@ -638,4 +642,6 @@
+   }
+ }
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/bignum-dtoa.h ./pxrDoubleConversion/bignum-dtoa.h
+--- ./double-conversion/bignum-dtoa.h	2024-01-19 13:29:18.296877660 -0800
++++ ./pxrDoubleConversion/bignum-dtoa.h	2024-01-21 20:55:47.711198137 -0800
+@@ -30,7 +30,11 @@
+ 
+ #include "utils.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ enum BignumDtoaMode {
+   // Return the shortest correct representation.
+@@ -79,6 +83,8 @@
+ void BignumDtoa(double v, BignumDtoaMode mode, int requested_digits,
+                 Vector<char> buffer, int* length, int* point);
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+ 
+ #endif  // DOUBLE_CONVERSION_BIGNUM_DTOA_H_
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/bignum.h ./pxrDoubleConversion/bignum.h
+--- ./double-conversion/bignum.h	2024-01-19 13:29:18.309764956 -0800
++++ ./pxrDoubleConversion/bignum.h	2024-01-21 20:55:47.754179871 -0800
+@@ -30,7 +30,11 @@
+ 
+ #include "utils.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ class Bignum {
+  public:
+@@ -147,6 +151,8 @@
+   DOUBLE_CONVERSION_DISALLOW_COPY_AND_ASSIGN(Bignum);
+ };
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+ 
+ #endif  // DOUBLE_CONVERSION_BIGNUM_H_
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/cached-powers.cc ./pxrDoubleConversion/cached-powers.cc
+--- ./double-conversion/cached-powers.cc	2024-01-19 13:29:18.316510999 -0800
++++ ./pxrDoubleConversion/cached-powers.cc	2024-01-21 20:55:47.840428160 -0800
+@@ -33,7 +33,11 @@
+ 
+ #include "cached-powers.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ namespace PowersOfTenCache {
+ 
+@@ -172,4 +176,6 @@
+ 
+ }  // namespace PowersOfTenCache
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/cached-powers.h ./pxrDoubleConversion/cached-powers.h
+--- ./double-conversion/cached-powers.h	2024-01-19 13:29:18.322994967 -0800
++++ ./pxrDoubleConversion/cached-powers.h	2024-01-21 20:55:47.956530067 -0800
+@@ -30,7 +30,11 @@
+ 
+ #include "diy-fp.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ namespace PowersOfTenCache {
+ 
+@@ -59,6 +63,8 @@
+ 
+ }  // namespace PowersOfTenCache
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+ 
+ #endif  // DOUBLE_CONVERSION_CACHED_POWERS_H_
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/diy-fp.h ./pxrDoubleConversion/diy-fp.h
+--- ./double-conversion/diy-fp.h	2024-01-19 13:29:18.329087221 -0800
++++ ./pxrDoubleConversion/diy-fp.h	2024-01-21 20:55:55.850663122 -0800
+@@ -30,7 +30,11 @@
+ 
+ #include "utils.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ // This "Do It Yourself Floating Point" class implements a floating-point number
+ // with a uint64 significand and an int exponent. Normalized DiyFp numbers will
+@@ -132,6 +136,8 @@
+   int32_t e_;
+ };
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+ 
+ #endif  // DOUBLE_CONVERSION_DIY_FP_H_
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/double-to-string.cc ./pxrDoubleConversion/double-to-string.cc
+--- ./double-conversion/double-to-string.cc	2024-01-19 13:29:18.343146423 -0800
++++ ./pxrDoubleConversion/double-to-string.cc	2024-01-21 21:08:48.184639143 -0800
+@@ -37,7 +37,11 @@
+ #include "ieee.h"
+ #include "utils.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ const DoubleToStringConverter& DoubleToStringConverter::EcmaScriptConverter() {
+   int flags = UNIQUE_ZERO | EMIT_POSITIVE_EXPONENT_SIGN;
+@@ -444,4 +448,6 @@
+   vector[*length] = '\0';
+ }
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/double-to-string.h ./pxrDoubleConversion/double-to-string.h
+--- ./double-conversion/double-to-string.h	2024-01-19 13:29:18.351235139 -0800
++++ ./pxrDoubleConversion/double-to-string.h	2024-01-21 21:08:37.390530763 -0800
+@@ -30,7 +30,11 @@
+ 
+ #include "utils.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ class DoubleToStringConverter {
+  public:
+@@ -465,6 +469,8 @@
+   DOUBLE_CONVERSION_DISALLOW_IMPLICIT_CONSTRUCTORS(DoubleToStringConverter);
+ };
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+ 
+ #endif  // DOUBLE_CONVERSION_DOUBLE_TO_STRING_H_
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/fast-dtoa.cc ./pxrDoubleConversion/fast-dtoa.cc
+--- ./double-conversion/fast-dtoa.cc	2024-01-19 13:29:18.357277540 -0800
++++ ./pxrDoubleConversion/fast-dtoa.cc	2024-01-21 20:56:01.577278944 -0800
+@@ -31,7 +31,11 @@
+ #include "diy-fp.h"
+ #include "ieee.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ // The minimal and maximal target exponent define the range of w's binary
+ // exponent, where 'w' is the result of multiplying the input by a cached power
+@@ -662,4 +666,6 @@
+   return result;
+ }
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/fast-dtoa.h ./pxrDoubleConversion/fast-dtoa.h
+--- ./double-conversion/fast-dtoa.h	2024-01-19 13:29:18.366269494 -0800
++++ ./pxrDoubleConversion/fast-dtoa.h	2024-01-21 20:56:01.620222572 -0800
+@@ -30,7 +30,11 @@
+ 
+ #include "utils.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ enum FastDtoaMode {
+   // Computes the shortest representation of the given input. The returned
+@@ -83,6 +87,8 @@
+               int* length,
+               int* decimal_point);
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+ 
+ #endif  // DOUBLE_CONVERSION_FAST_DTOA_H_
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/fixed-dtoa.cc ./pxrDoubleConversion/fixed-dtoa.cc
+--- ./double-conversion/fixed-dtoa.cc	2024-01-19 13:29:18.376137018 -0800
++++ ./pxrDoubleConversion/fixed-dtoa.cc	2024-01-21 20:56:01.674314343 -0800
+@@ -30,7 +30,11 @@
+ #include "fixed-dtoa.h"
+ #include "ieee.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ // Represents a 128bit type. This class should be replaced by a native type on
+ // platforms that support 128bit integers.
+@@ -402,4 +406,6 @@
+   return true;
+ }
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/fixed-dtoa.h ./pxrDoubleConversion/fixed-dtoa.h
+--- ./double-conversion/fixed-dtoa.h	2024-01-19 13:29:18.382337618 -0800
++++ ./pxrDoubleConversion/fixed-dtoa.h	2024-01-21 20:56:01.762494089 -0800
+@@ -30,7 +30,11 @@
+ 
+ #include "utils.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ // Produces digits necessary to print a given number with
+ // 'fractional_count' digits after the decimal point.
+@@ -51,6 +55,8 @@
+ bool FastFixedDtoa(double v, int fractional_count,
+                    Vector<char> buffer, int* length, int* decimal_point);
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+ 
+ #endif  // DOUBLE_CONVERSION_FIXED_DTOA_H_
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/ieee.h ./pxrDoubleConversion/ieee.h
+--- ./double-conversion/ieee.h	2024-01-19 13:29:18.394010056 -0800
++++ ./pxrDoubleConversion/ieee.h	2024-01-21 20:56:01.818706202 -0800
+@@ -30,7 +30,11 @@
+ 
+ #include "diy-fp.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ // We assume that doubles and uint64_t have the same endianness.
+ static uint64_t double_to_uint64(double d) { return BitCast<uint64_t>(d); }
+@@ -442,6 +446,8 @@
+   DOUBLE_CONVERSION_DISALLOW_COPY_AND_ASSIGN(Single);
+ };
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+ 
+ #endif  // DOUBLE_CONVERSION_DOUBLE_H_
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/string-to-double.cc ./pxrDoubleConversion/string-to-double.cc
+--- ./double-conversion/string-to-double.cc	2024-01-19 13:29:18.400765207 -0800
++++ ./pxrDoubleConversion/string-to-double.cc	2024-01-21 21:08:24.489854447 -0800
+@@ -47,7 +47,11 @@
+ #  endif
+ #endif
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ namespace {
+ 
+@@ -815,4 +819,6 @@
+     return StringToFloat(buffer, length, processed_characters_count);
+ }
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/string-to-double.h ./pxrDoubleConversion/string-to-double.h
+--- ./double-conversion/string-to-double.h	2024-01-19 13:29:18.407068938 -0800
++++ ./pxrDoubleConversion/string-to-double.h	2024-01-21 21:08:11.177776906 -0800
+@@ -30,7 +30,11 @@
+ 
+ #include "utils.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ class StringToDoubleConverter {
+  public:
+@@ -233,6 +237,8 @@
+   DOUBLE_CONVERSION_DISALLOW_IMPLICIT_CONSTRUCTORS(StringToDoubleConverter);
+ };
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+ 
+ #endif  // DOUBLE_CONVERSION_STRING_TO_DOUBLE_H_
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/strtod.cc ./pxrDoubleConversion/strtod.cc
+--- ./double-conversion/strtod.cc	2024-01-19 13:29:18.413145118 -0800
++++ ./pxrDoubleConversion/strtod.cc	2024-01-21 20:56:01.923645993 -0800
+@@ -33,7 +33,11 @@
+ #include "ieee.h"
+ #include "strtod.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ #if defined(DOUBLE_CONVERSION_CORRECT_DOUBLE_OPERATIONS)
+ // 2^53 = 9007199254740992.
+@@ -605,4 +609,6 @@
+   }
+ }
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/strtod.h ./pxrDoubleConversion/strtod.h
+--- ./double-conversion/strtod.h	2024-01-19 13:29:18.419185547 -0800
++++ ./pxrDoubleConversion/strtod.h	2024-01-21 20:56:02.002255511 -0800
+@@ -30,7 +30,11 @@
+ 
+ #include "utils.h"
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ // The buffer must only contain digits in the range [0-9]. It must not
+ // contain a dot or a sign. It must not start with '0', and must not be empty.
+@@ -59,6 +63,8 @@
+   return Vector<const char>(buffer.start(), 0);
+ }
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+ 
+ #endif  // DOUBLE_CONVERSION_STRTOD_H_
+diff -ruaN -x README -x CMakeLists.txt -x SConscript -x .gitignore -x pxr-double-conversion.patch ./double-conversion/utils.h ./pxrDoubleConversion/utils.h
+--- ./double-conversion/utils.h	2024-01-19 13:29:18.425838250 -0800
++++ ./pxrDoubleConversion/utils.h	2024-01-21 21:06:08.964262635 -0800
+@@ -236,7 +236,11 @@
+ #define DC_DISALLOW_IMPLICIT_CONSTRUCTORS DOUBLE_CONVERSION_DISALLOW_IMPLICIT_CONSTRUCTORS
+ #endif
+ 
+-namespace double_conversion {
++#include "pxr/pxr.h"
++
++PXR_NAMESPACE_OPEN_SCOPE
++
++namespace pxr_double_conversion {
+ 
+ inline int StrLength(const char* string) {
+   size_t length = strlen(string);
+@@ -413,6 +417,8 @@
+   return BitCast<Dest>(reinterpret_cast<uintptr_t>(source));
+ }
+ 
+-}  // namespace double_conversion
++}  // namespace pxr_double_conversion
++
++PXR_NAMESPACE_CLOSE_SCOPE
+ 
+ #endif  // DOUBLE_CONVERSION_UTILS_H_

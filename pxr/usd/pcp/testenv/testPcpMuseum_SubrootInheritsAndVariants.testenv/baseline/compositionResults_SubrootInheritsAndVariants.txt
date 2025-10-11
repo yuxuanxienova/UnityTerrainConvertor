@@ -1,0 +1,84 @@
+Loading @SubrootInheritsAndVariants/root.usda@
+
+------------------------------------------------------------------------
+Layer Stack:
+     root.usda
+
+------------------------------------------------------------------------
+Results for composing </Group>
+
+Prim Stack:
+    root.usda            /Group
+    root.usda            /Group{v=z}
+
+Variant Selections:
+    {v = z}
+
+Child names:
+     ['Model']
+
+------------------------------------------------------------------------
+Results for composing </Group/Model>
+
+Prim Stack:
+    root.usda            /Group{v=z}Model
+
+Property names:
+     ['a']
+
+Property stacks:
+/Group/Model.a:
+    root.usda            /Group{v=z}Model.a
+
+------------------------------------------------------------------------
+Results for composing </SubrootInheritRef>
+
+Prim Stack:
+    root.usda            /SubrootInheritRef
+    root.usda            /Group{v=z}Model
+    group.usda           /SubrootInherit
+    group.usda           /Group{v=y}Model
+
+Property names:
+     ['a']
+
+Property stacks:
+/SubrootInheritRef.a:
+    root.usda            /Group{v=z}Model.a
+    group.usda           /Group{v=y}Model.a
+
+------------------------------------------------------------------------
+Results for composing </Root>
+
+Prim Stack:
+    root.usda            /Root
+    model.usda           /Model
+    model.usda           /Model{v=x}
+
+Variant Selections:
+    {v = x}
+
+Child names:
+     ['Child']
+
+Property names:
+     ['modelAttr']
+
+Property stacks:
+/Root.modelAttr:
+    model.usda           /Model{v=x}.modelAttr
+
+------------------------------------------------------------------------
+Results for composing </Root/Child>
+
+Prim Stack:
+    root.usda            /Root/Child
+    root.usda            /Group{v=z}Model
+
+Property names:
+     ['a']
+
+Property stacks:
+/Root/Child.a:
+    root.usda            /Group{v=z}Model.a
+

@@ -1,0 +1,1174 @@
+#usda 1.0
+(
+    "Test schema file for testUsdAppliedAPISchemas"
+    subLayers = [
+        @usd/schema.usda@
+    ]
+)
+
+def "GLOBAL" (
+    customData = {
+        string libraryName      = "testUsdAppliedAPISchemas"
+        string libraryPath      = "pxr/usd/usd"
+        bool skipCodeGeneration = true
+    }
+)
+{
+}
+
+class "TestMultiApplyAPI"
+(
+    inherits = </APISchemaBase>
+    doc = """Test multi-apply API schema"""
+
+    customData = {
+        token apiSchemaType = "multipleApply"
+        token propertyNamespacePrefix  = "multi"
+    }
+)
+{
+    uniform token token_attr = "foo" (
+        allowedTokens = ["foo", "bar", "baz"]
+        doc = """Token attribute"""
+    )
+    uniform bool bool_attr = true (
+        doc = """Boolean attribute"""
+    )
+    rel relationship (
+        doc = """Relationship"""
+    )
+}
+
+class "TestSingleApplyAPI"
+(
+    inherits = </APISchemaBase>
+    customData = {
+        string className = "SingleApplyAPI"
+        token[] apiSchemaAutoApplyTo = [
+            "TestTypedSchemaForAutoApplyConcreteBase", 
+            "TestTypedSchemaForAutoApplyAbstractBase",
+            "TestAutoAppliedToAPI"
+        ] 
+    }
+    uiHints = {
+        string displayGroup = "TestSingleApplyAPI group"
+        dictionary customDict = {
+            int TestSingleApplyAPI = 3
+            string TestCompose = "TestSingleApplyAPI"
+        }
+    }
+    doc = """Test single apply API schema"""
+)
+{
+    reorder properties = ['single:relationship', 'single:token_attr', 'single:bool_attr']
+    uniform token single:token_attr = "bar" (
+        allowedTokens = ["foo", "bar", "baz"]
+        doc = """Token attribute"""
+    )
+    uniform bool single:bool_attr = true (
+        doc = """Boolean attribute"""
+        uiHints = {
+            string displayGroup = "single:bool_attr group"
+            dictionary valueLabels = {
+                bool TestCompose = True
+                bool single_bool_attr = False
+            }
+        }
+    )
+    rel single:relationship (
+        doc = """Relationship"""
+    )
+}
+
+class "TestComposeMetadataAPI"
+(
+    inherits = </APISchemaBase>
+    customData = {
+        string className = "ComposeMetadataAPI"
+        token[] apiSchemaAutoApplyTo = [
+            "TestTypedSchemaForAutoApplyConcreteBase", 
+            "TestTypedSchemaForAutoApplyAbstractBase",
+            "TestAutoAppliedToAPI"
+        ] 
+    }
+    doc = """Test single apply API schema"""
+    uiHints = {
+        string displayGroup = "TestComposeMetadataAPI group"
+        dictionary customDict = {
+            int TestComposeMetadataAPI = 1
+            string TestCompose = "TestComposeMetadataAPI"
+        }
+    }
+)
+{
+    reorder properties = ['compose:relationship', 'compose:token_attr', 'compose:bool_attr']
+    uniform token compose:token_attr = "bar" (
+        allowedTokens = ["foo", "bar", "baz"]
+        doc = """Token attribute"""
+    )
+    uniform bool compose:bool_attr = true (
+        doc = """Boolean attribute"""
+    )
+    rel compose:relationship (
+        doc = """Relationship"""
+    )
+    uniform bool single:bool_attr = true (
+        doc = """Testing duplicate ignore"""
+        uiHints = {
+            string displayGroup = "single:bool_attr group"
+            dictionary valueLabels = {
+                bool compose_bool_attr = True
+                bool TestCompose = False
+            }
+        }
+    )
+}
+
+class "TestSingleCanApplyAPI"
+(
+    inherits = </APISchemaBase>
+    customData = {
+        string className = "SingleCanApplyAPI"
+        token[] apiSchemaCanOnlyApplyTo = [
+            "TestTypedSchemaForAutoApply", 
+            "TestTypedSchemaForAutoApplyConcreteBase", 
+        ] 
+    }
+    doc = """Test single apply API schema with canOnlyApplyTo restrictions"""
+)
+{
+    uniform token singleCan:token_attr = "bar" (
+        allowedTokens = ["foo", "bar", "baz"]
+        doc = """Token attribute"""
+    )
+    uniform bool singleCan:bool_attr = true (
+        doc = """Boolean attribute"""
+    )
+    rel singleCan:relationship (
+        doc = """Relationship"""
+    )
+}
+
+class "TestMultiCanApplyAPI"
+(
+    inherits = </APISchemaBase>
+    doc = """Test multi-apply API schema with instance name and canOnlyApplyTo restrictions"""
+
+    customData = {
+        token apiSchemaType = "multipleApply"
+        token propertyNamespacePrefix  = "multi"
+        token[] apiSchemaAllowedInstanceNames = ["foo", "bar", "baz"]
+        token[] apiSchemaCanOnlyApplyTo = [
+            "TestTypedSchemaForAutoApply", 
+            "TestTypedSchemaForAutoApplyAbstractBase"
+        ] 
+        dictionary apiSchemaInstances = {
+            dictionary foo = {
+                token[] apiSchemaCanOnlyApplyTo = [
+                    "TestTypedSchemaForAutoApply", 
+                    "TestTypedSchemaForAutoApplyConcreteBase"
+                ] 
+            }
+            dictionary bar = {
+                token[] apiSchemaCanOnlyApplyTo = [
+                    "TestTypedSchemaForAutoApplyAbstractBase", 
+                    "TestTypedSchemaForAutoApplyConcreteBase"
+                ] 
+            }
+        }
+    }
+)
+{
+    uniform token token_attr = "foo" (
+        allowedTokens = ["foo", "bar", "baz"]
+        doc = """Token attribute"""
+    )
+    uniform bool bool_attr = true (
+        doc = """Boolean attribute"""
+    )
+    rel relationship (
+        doc = """Relationship"""
+    )
+}
+
+class TestTypedSchema "TestTypedSchema" (
+    inherits = </Typed>
+    doc = "Testing typed schema"
+    hidden = true
+)
+{
+    reorder properties = ['testRel', 'testAttr']
+    string testAttr = "foo" (
+        allowedTokens = ["bar", "baz"]
+        doc = "Testing documentation metadata"
+    )
+
+    rel testRel (
+        displayGroup = "Display Group"
+        doc = "Testing documentation metadata"
+    )
+}
+
+class TestWithBuiltinAppliedSchema "TestWithBuiltinAppliedSchema" (
+    inherits = </Typed>
+    doc = """Test with built-in API schemas"""
+    prepend apiSchemas = ["TestSingleApplyAPI", "TestMultiApplyAPI:builtin", "TestComposeMetadataAPI"]
+    hidden = false
+    uiHints = {
+        string displayGroup = "TestWithBuiltinAppliedSchema group"
+        dictionary customDict = {
+            int TestWithBuiltinAppliedSchema = 2
+            string TestCompose = "TestWithBuiltinAppliedSchema"
+        }
+    }
+)
+{
+    uniform bool multi:builtin:bool_attr = false (
+        doc = """Override bool_attr from TestMultiApplyAPI:builtin"""
+    )
+    string testAttr = "foo" (
+        allowedTokens = ["bar", "baz"]
+        doc = "Testing documentation metadata"
+    )
+
+    rel testRel (
+        displayGroup = "Display Group"
+        doc = "Testing documentation metadata"
+    )
+}
+
+class TestTypedSchemaForAutoApply "TestTypedSchemaForAutoApply" (
+    inherits = </Typed>
+    doc = "Testing typed schema"
+    hidden = true
+    prepend apiSchemas = ["TestMultiApplyAPI:builtin"]
+)
+{
+    string testAttr = "foo" (
+        allowedTokens = ["bar", "baz"]
+        doc = "Testing documentation metadata"
+    )
+
+    rel testRel (
+        displayGroup = "Display Group"
+        doc = "Testing documentation metadata"
+    )
+}
+
+class TestTypedSchemaForAutoApplyConcreteBase "TestTypedSchemaForAutoApplyConcreteBase" (
+    inherits = </Typed>
+    doc = "Testing typed schema"
+    hidden = true
+)
+{
+    string testAttr = "foo" (
+        allowedTokens = ["bar", "baz"]
+        doc = "Testing documentation metadata"
+    )
+
+    rel testRel (
+        displayGroup = "Display Group"
+        doc = "Testing documentation metadata"
+    )
+}
+
+class TestDerivedTypedSchemaForAutoApplyConcreteBase "TestDerivedTypedSchemaForAutoApplyConcreteBase" (
+    inherits = </TestTypedSchemaForAutoApplyConcreteBase>
+    doc = "Testing typed schema"
+    hidden = true
+)
+{
+}
+
+class "TestTypedSchemaForAutoApplyAbstractBase" (
+    inherits = </Typed>
+    doc = "Testing typed schema"
+    hidden = true
+)
+{
+    string testAttr = "foo" (
+        allowedTokens = ["bar", "baz"]
+        doc = "Testing documentation metadata"
+    )
+
+    rel testRel (
+        displayGroup = "Display Group"
+        doc = "Testing documentation metadata"
+    )
+}
+
+class TestDerivedTypedSchemaForAutoApplyAbstractBase "TestDerivedTypedSchemaForAutoApplyAbstractBase" (
+    inherits = </TestTypedSchemaForAutoApplyAbstractBase>
+    doc = "Testing typed schema"
+    hidden = true
+)
+{
+}
+
+class "TestNestedInnerSingleApplyAPI"
+(
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestSingleApplyAPI",
+                          "TestMultiApplyAPI:bar"]
+    customData = {
+        string className = "NestedInnerSingleApplyAPI"
+    }
+    doc = """Test nested single apply API schema: inner schema"""
+)
+{
+    uniform token innerSingle:token_attr = "inner" (
+        doc = """Token attribute"""
+    )
+    uniform int innerSingle:int_attr = 3 (
+        doc = """Int attribute"""
+    )
+    rel innerSingle:relationship (
+        doc = """Relationship"""
+    )
+    token multi:bar:token_attr = "inner_override" (
+        doc = """Override of TestMultiApplyAPI:bar token_attr"""
+    )
+}
+
+class "TestNestedOuterSingleApplyAPI"
+(
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestMultiApplyAPI:foo", 
+                          "TestNestedInnerSingleApplyAPI"]
+    customData = {
+        string className = "NestedOuterSingleApplyAPI"
+    }
+    doc = """Test nested single apply API schema: outer schema"""
+)
+{
+    uniform token outerSingle:token_attr = "outer" (
+        doc = """Token attribute"""
+    )
+    uniform int outerSingle:int_attr = 4 (
+        doc = """Int attribute"""
+    )
+    rel outerSingle:relationship (
+        doc = """Relationship"""
+    )
+    token single:token_attr = "outer_override" (
+        doc = """Override of TestSingleApplyAPI token_attr"""
+    )
+
+}
+
+class "TestNestedInnerMultiApplyBaseAPI"
+(
+    inherits = </APISchemaBase>
+    customData = {
+        token apiSchemaType = "multipleApply"
+        token propertyNamespacePrefix  = "innerMulti"
+        string className = "NestedInnerMultiApplyBaseAPI"
+    }
+    doc = """Test nested multi apply API schema: inner schema base class"""
+)
+{
+    uniform token token_attr = "inner_base" (
+        doc = """Token attribute"""
+    )
+    uniform int int_attr = 3 (
+        doc = """Int attribute"""
+    )
+    rel relationship (
+        doc = """Relationship"""
+    )
+}
+
+class "TestNestedInnerMultiApplyDerivedAPI"
+(
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestNestedInnerMultiApplyBaseAPI"]
+    customData = {
+        token apiSchemaType = "multipleApply"
+        token propertyNamespacePrefix  = "innerMulti"
+        string className = "NestedInnerMultiApplyDerivedAPI"
+    }
+    doc = """Test nested multi apply API schema: inner schema derived"""
+)
+{
+    uniform token token_attr = "inner_derived" (
+        doc = """Override of TestNestedInnerMultiApplyBaseAPI token_attr"""
+    )
+    uniform int derived:int_attr = 4 (
+        doc = """Int attribute"""
+    )
+}
+
+class "TestNestedOuterMultiApplyAPI"
+(
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestNestedInnerMultiApplyDerivedAPI:builtin", 
+                  "TestNestedInnerMultiApplyDerivedAPI:outerMulti",
+                  "TestNestedInnerMultiApplyBaseAPI"]
+    customData = {
+        token apiSchemaType = "multipleApply"
+        token propertyNamespacePrefix  = "outerMulti"
+        string className = "NestedOuterMultiApplyAPI"
+    }
+    doc = """Test nested multi apply API schema: outer schema"""
+)
+{
+    uniform token token_attr = "outer" (
+        doc = """Token attribute"""
+    )
+    uniform int int_attr = 5 (
+        doc = """Int attribute"""
+    )
+    rel relationship (
+        doc = """Relationship"""
+    )
+}
+
+class "TestNestedMultiApplyInSingleApplyAPI"
+(
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestNestedOuterMultiApplyAPI:foo", 
+                  "TestNestedInnerMultiApplyDerivedAPI:bar"]
+    customData = {
+        string className = "NestedMultiApplyInSingleApplyAPI"
+    }
+    doc = """Test single apply API with builtin nested multi apply API schema instances"""
+)
+{
+    uniform int int_attr = 10 (
+        doc = """Int attribute"""
+    )
+    uniform int innerMulti:foo:builtin:derived:int_attr = 20 (
+        doc = """Override of int attribute"""
+    )
+    uniform int innerMulti:bar:int_attr = 30 (
+        doc = """Override of int attribute"""
+    )
+}
+
+class "TestNestedCycle1API"
+(
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestNestedCycle2API"]
+    customData = {
+        string className = "NestedCycle1API"
+    }
+    doc = """Test nested single apply API schema with a cycle #1"""
+)
+{
+    uniform token cycle1:token_attr = "cycle1" (
+        doc = """Token attribute"""
+    )
+    uniform int cycle:int_attr = 1 (
+        doc = """Int attribute"""
+    )
+}
+
+class "TestNestedCycle2API"
+(
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestNestedCycle3API"]
+    customData = {
+        string className = "NestedCycle2API"
+    }
+    doc = """Test nested single apply API schema with a cycle #2"""
+)
+{
+    uniform token cycle2:token_attr = "cycle2" (
+        doc = """Token attribute"""
+    )
+    uniform int cycle:int_attr = 2 (
+        doc = """Int attribute"""
+    )
+}
+
+class "TestNestedCycle3API"
+(
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestNestedCycle1API"]
+    customData = {
+        string className = "NestedCycle3API"
+    }
+    doc = """Test nested single apply API schema with a cycle #3"""
+)
+{
+    uniform token cycle3:token_attr = "cycle3" (
+        doc = """Token attribute"""
+    )
+    uniform int cycle:int_attr = 3 (
+        doc = """Int attribute"""
+    )
+}
+
+class TestWithBuiltinNestedAppliedSchema "TestWithBuiltinNestedAppliedSchema" (
+    inherits = </Typed>
+    doc = """Test with built-in nested API schemas"""
+    prepend apiSchemas = ["TestNestedOuterSingleApplyAPI", "TestNestedCycle1API"]
+    hidden = false
+)
+{
+    string testAttr = "foo" (
+        allowedTokens = ["bar", "baz"]
+        doc = "Testing documentation metadata"
+    )
+
+    rel testRel (
+        displayGroup = "Display Group"
+        doc = "Testing documentation metadata"
+    )
+}
+
+class "TestAutoAppliedToAPI" (
+    inherits = </APISchemaBase>
+    doc = "API that has other API schemas that auto apply to it"
+    prepend apiSchemas = ["TestMultiApplyAPI:builtin"]
+    customData = {
+        token[] apiSchemaAutoApplyTo = ["TestNestedAutoAppliedToAPI"] 
+    }
+)
+{
+    string testAttr = "foo" (
+        allowedTokens = ["bar", "baz"]
+        doc = "Testing documentation metadata"
+    )
+
+    rel testRel (
+        displayGroup = "Display Group"
+        doc = "Testing documentation metadata"
+    )
+}
+
+class "TestNestedAutoAppliedToAPI" (
+    inherits = </APISchemaBase>
+    doc = """
+API that TestAutoAppliedToAPI auto applies to for testing that API schemas can 
+be nested through auto apply"""
+    prepend apiSchemas = ["TestMultiApplyAPI:foo"]
+    customData = {
+        token[] apiSchemaAutoApplyTo = ["TestNestedAutoAppliedToAPIAppliedToPrim"] 
+    }
+)
+{
+}
+
+class TestNestedAutoAppliedToAPIAppliedToPrim "TestNestedAutoAppliedToAPIAppliedToPrim" (
+    inherits = </Typed>
+    doc = """
+Typed schema that TestNestedAutoAppliedToAPI auto applies to for testing that 
+API schemas with auto applied API schemas can be correctly auto applied to prim
+type schemas"""
+)
+{
+}
+
+class "TestNestedMultiApplyCycle1API"
+(
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestNestedMultiApplyCycle2API:cycle1",
+                          "TestNestedMultiApplyCycle3API"]
+    customData = {
+        token apiSchemaType = "multipleApply"
+        token propertyNamespacePrefix  = "cycle1"
+        string className = "NestedMultiApplyCycle1API"
+    }
+    doc = """Test nested multi apply API schema cycle"""
+)
+{
+    uniform token token_attr = "cycle1" (
+        doc = """Token attribute"""
+    )
+}
+
+class "TestNestedMultiApplyCycle2API"
+(
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestNestedMultiApplyCycle3API:cycle2",
+                          "TestNestedMultiApplyCycle1API"]
+    customData = {
+        token apiSchemaType = "multipleApply"
+        token propertyNamespacePrefix  = "cycle2"
+        string className = "NestedMultiApplyCycle2API"
+    }
+    doc = """Test nested multi apply API schema cycle"""
+)
+{
+    uniform token token_attr = "cycle2" (
+        doc = """Token attribute"""
+    )
+}
+
+class "TestNestedMultiApplyCycle3API"
+(
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestNestedMultiApplyCycle1API:cycle3",
+                          "TestNestedMultiApplyCycle2API"]
+    customData = {
+        token apiSchemaType = "multipleApply"
+        token propertyNamespacePrefix  = "cycle3"
+        string className = "NestedMultiApplyCycle3API"
+    }
+    doc = """Test nested multi apply API schema cycle"""
+)
+{
+    uniform token token_attr = "cycle3" (
+        doc = """Token attribute"""
+    )
+}
+
+class "TestPropCompOneAPI" (
+    inherits = </APISchemaBase>
+)
+{
+    int oneAttr1 = 1 ( 
+    	hidden = false 
+    	doc = "From TestPropCompOneAPI"
+    )
+    double oneAttr2 = 1.0 ( 
+    	doc = "From TestPropCompOneAPI"
+    )
+    color3f oneAttr3 ( 
+    	hidden = false 
+    	doc = "From TestPropCompOneAPI"
+    )
+    token oneAttr4 ( 
+    	doc = "From TestPropCompOneAPI"
+    )
+    token oneAttr5 ( 
+    	doc = "From TestPropCompOneAPI"
+    )
+
+    int twoAttr1 = 1 ( 
+    	hidden = true 
+    	doc = "From TestPropCompOneAPI"
+    )
+    double twoAttr2 = 1.0 ( 
+    	hidden = true 
+    	doc = "From TestPropCompOneAPI"
+    )
+    color3f twoAttr3 = (1.0, 1.0, 1.0) ( 
+    	hidden = true 
+    	doc = "From TestPropCompOneAPI"
+    )
+    token twoAttr4 = "one" ( 
+    	hidden = true 
+    	doc = "From TestPropCompOneAPI"
+    )
+    float twoAttr5 = 1.0 ( 
+    	hidden = true 
+    	doc = "From TestPropCompOneAPI"
+    )
+
+    string nestedAttr1 = "one" (
+    	hidden = true
+    	doc = "From TestPropCompOneAPI"
+    )
+    int nestedAttr2 (
+    	hidden = true
+    	doc = "From TestPropCompOneAPI"
+    )
+    double nestedAttr3 = 1.0 (
+    	hidden = true
+    	doc = "From TestPropCompOneAPI"
+    )
+    point3f nestedAttr4 = (1.0, 1.0, 1.0) (
+    	hidden = false
+    	doc = "From TestPropCompOneAPI"
+    )
+
+    token otherMetadataAttr
+}
+
+class "TestPropCompTwoAPI" (
+    inherits = </APISchemaBase>
+    customData = {
+        token[] apiSchemaAutoApplyTo = [
+           "TestPropCompNestedAPI"] 
+    }
+)
+{
+    uniform int oneAttr1 = 2 ( 
+    	hidden = true 
+    	doc = "From TestPropCompTwoAPI"
+    )
+    uniform double oneAttr2 = 2.0 ( 
+    	hidden = true 
+    	doc = "From TestPropCompTwoAPI"
+    )
+    uniform color3f oneAttr3 = (2.0, 2.0, 2.0) ( 
+    	hidden = true 
+    	doc = "From TestPropCompTwoAPI"
+    )
+    uniform token oneAttr4 = "two" ( 
+    	hidden = true 
+    	doc = "From TestPropCompTwoAPI"
+    )
+    uniform string oneAttr5 = "two" ( 
+    	hidden = true 
+    	doc = "From TestPropCompTwoAPI"
+    )
+
+    int twoAttr1 = 2 ( 
+    	hidden = false 
+    	doc = "From TestPropCompTwoAPI"
+    )
+    double twoAttr2 = 2.0 ( 
+    	doc = "From TestPropCompTwoAPI"
+    )
+    color3f twoAttr3 ( 
+    	hidden = false 
+    	doc = "From TestPropCompTwoAPI"
+    )
+    token twoAttr4 ( 
+    	doc = "From TestPropCompTwoAPI"
+    )
+    double twoAttr5 ( 
+    	doc = "From TestPropCompTwoAPI"
+    )
+
+    string nestedAttr1 = "two" (
+    	hidden = true
+    	doc = "From TestPropCompTwoAPI"
+    )
+    int nestedAttr2 = 2 (
+    	doc = "From TestPropCompTwoAPI"
+    )
+    double nestedAttr3 = 2.0 (
+    	hidden = true
+    	doc = "From TestPropCompTwoAPI"
+    )
+    color3f nestedAttr4 = (2.0, 2.0, 2.0) (
+    	hidden = true
+    	doc = "From TestPropCompTwoAPI"
+    )
+
+    token otherMetadataAttr = "two" (
+    	hidden = false
+    	doc = "From TestPropCompTwoAPI"
+    	displayGroup = "Two Group"
+    	displayName = "OtherTwoAttr"
+    	allowedTokens = ["two", "2"]
+  	)
+}
+
+class "TestPropCompNestedAPI" (
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestPropCompOneAPI"]
+)
+{
+    string nestedAttr1 = "nested" (
+    	hidden = false
+    	doc = "From TestPropCompNestedAPI"
+    )
+    int nestedAttr2 (
+    	doc = "From TestPropCompNestedAPI"
+    )
+    double nestedAttr3 (
+    	hidden = false
+    	doc = "From TestPropCompNestedAPI"
+    )
+    color3f nestedAttr4 (
+    	doc = "From TestPropCompNestedAPI"
+    )
+}
+
+class TestPropCompsPrim "TestPropCompsPrim" (
+    inherits = </Typed>
+    prepend apiSchemas = ["TestPropCompTwoAPI"]
+)
+{
+    string nestedAttr1 = "prim" (
+    	hidden = false
+    	doc = "From TestPropCompsPrim"
+    )
+    int nestedAttr2 (
+    	doc = "From TestPropCompsPrim"
+    )
+    double nestedAttr3 (
+    	hidden = false
+    	doc = "From TestPropCompsPrim"
+    )
+    point3f nestedAttr4 (
+    	doc = "From TestPropCompsPrim"
+    )
+}
+
+class "TestPropertyOversOneAPI" (
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestPropertyOversTwoAPI",
+                          "TestPropertyOversThreeAPI"]
+)
+{
+    token int_defined_in_two = "1" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+
+    bool overrides_nothing = 1 (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    token defined_in_two = "1" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    
+    token defined_in_four_1 = "1" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+
+    token defined_in_four_2 = "1" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    
+    token multi:two:defined_in_m1 = "1" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+
+    uniform token uniform_token_defined_in_four = "uni_1" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    
+    token defined_in_auto = "1" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+}
+
+class "TestPropertyOversTwoAPI" (
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestPropertyOversMultiOneAPI:two"]
+)
+{
+    int int_defined_in_two = 2 (
+        doc = "Int defined in Two"
+    )
+
+    bool overrides_nothing = 1 (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    token defined_in_two = "two" (
+        allowedTokens = ["two", "2"]
+        doc = "Defined in Two"
+    )
+    
+    # Overrides just the doc string from TestPropertyOversThreeAPI
+    # when included by TestPropertyOversOneAPI. Does NOT add this 
+    # property to this schema itself
+    token defined_in_three (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+        doc = "Doc override in Two"
+    )
+    
+    token defined_in_four_1 = "2" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+        allowedTokens = ["two", "2"]
+    )
+}
+
+class "TestPropertyOversThreeAPI" (
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestPropertyOversFourAPI"]
+)
+{
+    bool overrides_nothing = 1 (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    token defined_in_three = "three" (
+        allowedTokens = ["three", "3"]
+        doc = "Defined in Three"
+    )
+    
+    # Deos nothing because it's weaker than the def in 
+    # TestPropertyOversTwoAPI
+    token defined_in_two (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+        doc = "Doc override in Three"
+    )
+
+    token uniform_token_defined_in_four = "uni_3" (
+        allowedTokens = ["uni_three", "uni_3"]
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+
+    token defined_in_four_2 = "3" (
+        allowedTokens = ["three", "3"]
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    
+    token defined_in_auto = "3" (
+        allowedTokens = ["three", "3"]
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+}
+
+class "TestPropertyOversFourAPI" (
+    inherits = </APISchemaBase>
+)
+{
+    bool overrides_nothing = 1 (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    token defined_in_two = "4" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    
+    token defined_in_four_1 = "four" (
+        allowedTokens = ["four", "4"]
+        doc = "Defined in Four"
+    )
+    
+    token defined_in_four_2 = "four" (
+        allowedTokens = ["four", "4"]
+        doc = "Defined in Four also"
+    )
+    
+    uniform token uniform_token_defined_in_four = "uni_four" (
+        allowedTokens = ["uni_four", "uni_4"]
+        doc = "Uniform token defined in Four"
+    )
+    
+    token defined_in_auto = "4" (
+        doc = "Override doc in Four"
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+}
+
+class "TestPropertyOversMultiOneAPI" (
+    inherits = </APISchemaBase>
+    prepend apiSchemas = ["TestPropertyOversMultiTwoAPI",
+                          "TestPropertyOversMultiTwoAPI:multiOne",
+                          "TestPropertyOversMultiThreeAPI:multiOne"]
+    customData = {
+        token apiSchemaType = "multipleApply"
+        token propertyNamespacePrefix  = "multi"
+    }
+)
+{
+    bool overrides_nothing = 1 (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    token defined_in_m1 = "multi_one" (
+        allowedTokens = ["multi_one", "m1"]
+        doc = "Defined in MultiOne"
+    )
+    
+    token defined_in_m2 = "m1" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+
+    token multiOne:defined_in_m2 = "multiOne:m1" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+}
+
+class "TestPropertyOversMultiTwoAPI" (
+    inherits = </APISchemaBase>
+    customData = {
+        token apiSchemaType = "multipleApply"
+        token propertyNamespacePrefix  = "multi"
+    }
+)
+{
+    bool overrides_nothing = 1 (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    token defined_in_m2 = "multi_two" (
+        allowedTokens = ["multi_two", "m2"]
+        doc = "Defined in MultiTwo"
+    )
+}
+
+class "TestPropertyOversMultiThreeAPI" (
+    inherits = </APISchemaBase>
+    customData = {
+        token apiSchemaType = "multipleApply"
+        token propertyNamespacePrefix  = "otherMulti"
+    }
+)
+{
+    bool overrides_nothing = 1 (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    
+    token defined_in_m3 = "multi_three" (
+        allowedTokens = ["multi_three", "m3"]
+        doc = "Defined in MultiThree"
+    )
+}
+
+class TestPropertyOversTypedPrimBase "TestPropertyOversTypedPrimBase" (
+    inherits = </Typed>
+    prepend apiSchemas = ["TestPropertyOversTwoAPI"]
+)
+{
+    bool overrides_nothing = 1 (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+
+    token defined_in_two = "base_over" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+
+    int int_defined_in_two = 10 (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+        doc = "Int override in Base"
+    )
+    
+    token defined_in_three = "base_over" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    
+    token multi:two:defined_in_m2 = "base_over" (
+        allowedTokens = ["base_over", "over_base"]
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    
+    token defined_in_four_2 = "base_over" (
+        allowedTokens = ["base_over", "over_base"]
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+
+    token defined_in_base = "base_def" (
+        allowedTokens = ["base_def", "def_base"]
+        doc = "Defined in Base"
+    )
+    
+    token over_in_base = "base_over" (
+        allowedTokens = ["base_over", "over_base"]
+        doc = "Override in Base"
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+}
+
+class TestPropertyOversTypedPrimDerived "TestPropertyOversTypedPrimDerived" (
+    inherits = </TestPropertyOversTypedPrimBase>
+    prepend apiSchemas = ["TestPropertyOversThreeAPI"]
+)
+{
+    bool overrides_nothing = 1 (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+
+    token int_defined_in_two = "derived_over" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+
+    token multi:two:defined_in_m1 = "derived_over" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    
+    token defined_in_four_1 = "derived_over" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+
+    token multi:two:defined_in_m2 = "derived_over" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    
+    token defined_in_four_2 = "derived_over" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+
+    token uniform_token_defined_in_four = "uni_derived" (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    
+    token defined_in_base = "derived_over"
+    
+    token over_in_base = "derived_def" (
+        customData = {
+            bool apiSchemaOverride = false
+        }
+    )
+}
+
+class "TestPropertyOversAutoApplyAPI" (
+    inherits = </APISchemaBase>
+    customData = {
+        token[] apiSchemaAutoApplyTo = [
+            "TestPropertyOversThreeAPI"
+        ] 
+    }
+)
+{
+    bool overrides_nothing = 1 (
+        customData = {
+            bool apiSchemaOverride = true
+        }
+    )
+    token defined_in_auto = "auto" (
+        allowedTokens = ["auto"]
+        doc = "Defined in Auto"
+    )
+}

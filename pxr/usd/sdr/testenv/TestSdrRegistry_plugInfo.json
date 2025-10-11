@@ -1,0 +1,27 @@
+{
+  "Plugins": [
+    {
+      "Type": "library",
+      "Name": "TestSdrRegistry",
+      "Root": "@TEST_PLUG_INFO_ROOT@",
+      "LibraryPath": "@TEST_PLUG_INFO_LIBRARY_PATH@",
+      "ResourcePath": "@TEST_PLUG_INFO_RESOURCE_PATH@",
+      "Info": {
+        "Types": {
+          "_SdrTestDiscoveryPlugin": {
+            "bases": ["SdrDiscoveryPlugin"]
+          },
+          "_SdrTestDiscoveryPlugin2": {
+            "bases": ["SdrDiscoveryPlugin"]
+          },
+          "_SdrArgsTestParserPlugin": {
+            "bases": ["SdrParserPlugin"]
+          },
+          "_SdrOslTestParserPlugin": {
+            "bases": ["SdrParserPlugin"]
+          }
+        }
+      }
+    }
+  ]
+}

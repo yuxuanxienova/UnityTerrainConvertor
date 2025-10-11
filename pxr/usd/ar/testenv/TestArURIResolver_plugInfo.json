@@ -1,0 +1,43 @@
+{
+    "Plugins": [
+        {
+            "Type": "library",
+            "Name": "TestArURIResolver",
+            "Root": "@TEST_PLUG_INFO_ROOT@",
+            "LibraryPath": "@TEST_PLUG_INFO_LIBRARY_PATH@",
+            "ResourcePath": "@TEST_PLUG_INFO_RESOURCE_PATH@",
+            "Info": {
+                "Types": {
+                    "_TestURIResolverBase": {
+                        "bases": ["ArResolver"],
+                        "implementsContexts": true
+                    },
+                    "_TestURIResolver": {
+                        "bases": ["_TestURIResolverBase"],
+                        "uriSchemes": ["test"]
+                    },
+                    "_TestOtherURIResolver": {
+                        "bases": ["_TestURIResolverBase"],
+                        "uriSchemes": ["test-other"]
+                    },
+                    "_TestInvalidUnderbarURIResolver": {
+                        "bases": ["_TestURIResolverBase"],
+                        "uriSchemes": ["test_other"]
+                    },
+                    "_TestInvalidColonURIResolver": {
+                        "bases": ["_TestURIResolverBase"],
+                        "uriSchemes": ["other:test"]
+                    },
+                    "_TestInvalidNonAsciiURIResolver": {
+                        "bases": ["_TestURIResolverBase"],
+                        "uriSchemes": ["test-π-utf8"]
+                    },
+                    "_TestInvalidNumericPrefixResolver": {
+                        "bases": ["_TestURIResolverBase"],
+                        "uriSchemes": ["113-test"]
+                    }
+                }
+            }
+        }
+    ]
+}
