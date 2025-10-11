@@ -45,19 +45,7 @@ public class USDAExporter : EditorWindow
         if (string.IsNullOrEmpty(path))
             return;
 
-        MeshFilter mf = selected.GetComponent<MeshFilter>();
-        if (mf == null)
-        {
-            Debug.LogError("Selected GameObject does not have a MeshFilter.");
-            return;
-        }
-
-        Mesh mesh = mf.sharedMesh;
-        if (mesh == null)
-        {
-            Debug.LogError("MeshFilter has no sharedMesh.");
-            return;
-        }
+        // We will export all MeshFilters under the selected hierarchy; no single-mesh requirement
 
         // Ensure culture formatting with '.' for decimals
         CultureInfo cultureInfo = new CultureInfo("en-US");
@@ -68,7 +56,8 @@ public class USDAExporter : EditorWindow
             using (StreamWriter sw = new StreamWriter(path, false, new UTF8Encoding(false)))
             {
                 WriteUsdHeader(sw);
-                WriteMeshPrim(sw, selected.name, mesh, "    ");
+                // Export selected and all child MeshFilters
+                ExportHierarchyMeshes(sw, selected.transform, "    ");
                 WriteWorldFooter(sw);
             }
 
@@ -100,7 +89,51 @@ public class USDAExporter : EditorWindow
         sw.WriteLine("}");
     }
 
-    private void WriteMeshPrim(StreamWriter sw, string primName, Mesh mesh, string indent)
+    private void ExportHierarchyMeshes(StreamWriter sw, Transform root, string indent)
+    {
+        foreach (Transform tr in root.GetComponentsInChildren<Transform>(true))
+        {
+            MeshFilter mf = tr.GetComponent<MeshFilter>();
+            if (mf == null || mf.sharedMesh == null)
+                continue;
+
+            string primName = MakePrimNameFromPath(tr, root);
+            WriteMeshPrim(sw, primName, mf.sharedMesh, indent, tr);
+        }
+    }
+
+    private string MakePrimNameFromPath(Transform node, Transform root)
+    {
+        System.Collections.Generic.List<string> items = new System.Collections.Generic.List<string>();
+        Transform cur = node;
+        while (cur != null && cur != root.parent)
+        {
+            items.Add(SanitizePrimToken(cur.name));
+            if (cur == root) break;
+            cur = cur.parent;
+        }
+        items.Reverse();
+        return string.Join("_", items);
+    }
+
+    private string SanitizePrimToken(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return "Prim";
+        StringBuilder sb = new StringBuilder(s.Length);
+        for (int i = 0; i < s.Length; i++)
+        {
+            char c = s[i];
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
+                sb.Append(c);
+            else
+                sb.Append('_');
+        }
+        if (sb.Length > 0 && (sb[0] >= '0' && sb[0] <= '9'))
+            sb.Insert(0, '_');
+        return sb.ToString();
+    }
+
+    private void WriteMeshPrim(StreamWriter sw, string primName, Mesh mesh, string indent, Transform tr)
     {
         string ind0 = indent;              // inside World
         string ind1 = ind0 + "    ";      // inside Mesh body
@@ -134,7 +167,7 @@ public class USDAExporter : EditorWindow
                 EditorUtility.ClearProgressBar();
                 return;
             }
-            Vector3 p = vertices[i];
+            Vector3 p = (tr != null) ? tr.TransformPoint(vertices[i]) : vertices[i];
             if (exportInROSCoordinateFrame)
             {
                 p = ExtensionMethods.VecUnity2Ros(p);
@@ -160,7 +193,7 @@ public class USDAExporter : EditorWindow
                     EditorUtility.ClearProgressBar();
                     return;
                 }
-                Vector3 n = normals[i];
+                Vector3 n = (tr != null) ? tr.TransformDirection(normals[i]).normalized : normals[i];
                 if (exportInROSCoordinateFrame)
                 {
                     n = ExtensionMethods.NormUnity2Ros(n);
