@@ -1,5 +1,0 @@
-------------------------------------------------------------------------
-Errors while computing Layer Stack
-
-Error evaluating expression `"${BOGUS"` for sublayer in @ExpressionsInSublayers/root.usda@: Missing ending '}' at character 9
-

@@ -9,6 +9,8 @@ using System.Text;
 public class USDAExporter : EditorWindow
 {
     private bool exportInROSCoordinateFrame = false;
+    private bool exportMaterialsSeparately = false;
+    private string lastExportDir = null;
 
     [MenuItem("Tools/Export Selected to USDA")]
     static void Init()
@@ -24,6 +26,7 @@ public class USDAExporter : EditorWindow
 
         EditorGUILayout.Space();
         exportInROSCoordinateFrame = EditorGUILayout.Toggle("Export In ROS Coordinate", exportInROSCoordinateFrame);
+        exportMaterialsSeparately = EditorGUILayout.Toggle("Export Materials Separately", exportMaterialsSeparately);
 
         EditorGUILayout.Space();
         if (GUILayout.Button("Export"))
@@ -55,9 +58,55 @@ public class USDAExporter : EditorWindow
         {
             using (StreamWriter sw = new StreamWriter(path, false, new UTF8Encoding(false)))
             {
+                lastExportDir = Path.GetDirectoryName(path);
+                var nodes = new System.Collections.Generic.List<(Transform tr, Mesh mesh, Renderer renderer)>();
+                var matToName = new System.Collections.Generic.Dictionary<Material, string>();
+                CollectHierarchyMeshesAndMaterials(selected.transform, nodes, matToName);
+
+                string materialsPath = null;
+                if (matToName.Count > 0 && exportMaterialsSeparately)
+                {
+                    string dir = lastExportDir;
+                    string baseName = Path.GetFileNameWithoutExtension(path);
+                    materialsPath = Path.Combine(dir, baseName + "_Looks.usda");
+                    WriteMaterialsFile(materialsPath, matToName);
+                }
+
                 WriteUsdHeader(sw);
-                // Export selected and all child MeshFilters
-                ExportHierarchyMeshes(sw, selected.transform, "    ");
+
+                // Looks scope (inline or reference)
+                if (matToName.Count > 0)
+                {
+                    if (exportMaterialsSeparately)
+                    {
+                        string ind0 = "    ";
+                        sw.WriteLine(ind0 + "def Scope \"Looks\" (");
+                        sw.WriteLine(ind0 + "    references = @" + Path.GetFileName(materialsPath) + "@</Looks>");
+                        sw.WriteLine(ind0 + ")");
+                        sw.WriteLine(ind0 + "{");
+                        sw.WriteLine(ind0 + "}");
+                        sw.WriteLine();
+                    }
+                    else
+                    {
+                        WriteMaterialsInline(sw, matToName, "    ");
+                    }
+                }
+
+                // Meshes with bindings
+                foreach (var node in nodes)
+                {
+                    string primName = MakePrimNameFromPath(node.tr, selected.transform);
+                    string binding = null;
+                    if (node.renderer != null)
+                    {
+                        var um = node.renderer.sharedMaterial;
+                        if (um != null && matToName.TryGetValue(um, out var matName))
+                            binding = "/World/Looks/" + matName;
+                    }
+                    WriteMeshPrim(sw, primName, node.mesh, "    ", node.tr, binding);
+                }
+
                 WriteWorldFooter(sw);
             }
 
@@ -89,18 +138,7 @@ public class USDAExporter : EditorWindow
         sw.WriteLine("}");
     }
 
-    private void ExportHierarchyMeshes(StreamWriter sw, Transform root, string indent)
-    {
-        foreach (Transform tr in root.GetComponentsInChildren<Transform>(true))
-        {
-            MeshFilter mf = tr.GetComponent<MeshFilter>();
-            if (mf == null || mf.sharedMesh == null)
-                continue;
-
-            string primName = MakePrimNameFromPath(tr, root);
-            WriteMeshPrim(sw, primName, mf.sharedMesh, indent, tr);
-        }
-    }
+    private void ExportHierarchyMeshes(StreamWriter sw, Transform root, string indent) {}
 
     private string MakePrimNameFromPath(Transform node, Transform root)
     {
@@ -133,7 +171,7 @@ public class USDAExporter : EditorWindow
         return sb.ToString();
     }
 
-    private void WriteMeshPrim(StreamWriter sw, string primName, Mesh mesh, string indent, Transform tr)
+    private void WriteMeshPrim(StreamWriter sw, string primName, Mesh mesh, string indent, Transform tr, string materialBindingPath)
     {
         string ind0 = indent;              // inside World
         string ind1 = ind0 + "    ";      // inside Mesh body
@@ -215,10 +253,6 @@ public class USDAExporter : EditorWindow
                     return;
                 }
                 Vector2 uv = uvs[i];
-                if (exportInROSCoordinateFrame)
-                {
-                    uv = ExtensionMethods.UVUnity2Ros(uv);
-                }
                 outUvs[i] = uv;
             }
         }
@@ -289,8 +323,7 @@ public class USDAExporter : EditorWindow
         sw.WriteLine(ind1 + "]");
 
         // Physics collision attributes (enabled and mesh approximation)
-        sw.WriteLine("    bool physics:collisionEnabled = 1");
-        sw.WriteLine("    uniform token physics:approximation = \"triangleMesh\"");
+        // (write these once using final values)
 
         // normals (vertex interpolation)
         if (outNormals != null)
@@ -306,18 +339,24 @@ public class USDAExporter : EditorWindow
             sw.WriteLine(ind1 + "uniform token normals:interpolation = \"vertex\"");
         }
 
-        // UVs as primvar st (vertex interpolation)
+        // UVs as primvar st (faceVarying to match reference behavior)
         if (outUvs != null)
         {
             sw.WriteLine(ind1 + "texCoord2f[] primvars:st = [");
-            for (int i = 0; i < outUvs.Length; i++)
+            for (int i = 0; i < faceIndices.Length; i++)
             {
-                Vector2 uv = outUvs[i];
-                string suffix = (i == outUvs.Length - 1) ? string.Empty : ",";
+                Vector2 uv = outUvs[faceIndices[i]];
+                string suffix = (i == faceIndices.Length - 1) ? string.Empty : ",";
                 sw.WriteLine(ind2 + "(" + FormatFloat(uv.x) + ", " + FormatFloat(uv.y) + ")" + suffix);
             }
             sw.WriteLine(ind1 + "]");
-            sw.WriteLine(ind1 + "uniform token primvars:st:interpolation = \"vertex\"");
+            sw.WriteLine(ind1 + "uniform token primvars:st:interpolation = \"faceVarying\"");
+        }
+
+        // material binding (visual)
+        if (!string.IsNullOrEmpty(materialBindingPath))
+        {
+            sw.WriteLine(ind1 + "rel material:binding = <" + materialBindingPath + ">");
         }
 
         // Physics collision attributes (enabled and mesh approximation)
@@ -332,6 +371,419 @@ public class USDAExporter : EditorWindow
     private string FormatFloat(float v)
     {
         return v.ToString("0.########", CultureInfo.InvariantCulture);
+    }
+
+    private void CollectHierarchyMeshesAndMaterials(Transform root, System.Collections.Generic.List<(Transform tr, Mesh mesh, Renderer renderer)> nodes, System.Collections.Generic.Dictionary<Material, string> matToName)
+    {
+        foreach (Transform tr in root.GetComponentsInChildren<Transform>(true))
+        {
+            MeshFilter mf = tr.GetComponent<MeshFilter>();
+            if (mf == null || mf.sharedMesh == null)
+                continue;
+            Renderer rend = tr.GetComponent<Renderer>();
+            nodes.Add((tr, mf.sharedMesh, rend));
+
+            if (rend != null)
+            {
+                var m = rend.sharedMaterial;
+                if (m != null && !matToName.ContainsKey(m))
+                {
+                    string name = SanitizePrimToken(m.name);
+                    if (string.IsNullOrEmpty(name)) name = "Material";
+                    int suffix = 1;
+                    var existing = new System.Collections.Generic.HashSet<string>(matToName.Values);
+                    string baseName = name;
+                    while (existing.Contains(name))
+                    {
+                        name = baseName + "_" + suffix.ToString();
+                        suffix++;
+                    }
+                    matToName[m] = name;
+                }
+            }
+        }
+    }
+
+    private void WriteMaterialsInline(StreamWriter sw, System.Collections.Generic.Dictionary<Material, string> matToName, string indent)
+    {
+        string ind0 = indent;
+        string ind1 = ind0 + "    ";
+        string ind2 = ind1 + "    ";
+        sw.WriteLine(ind0 + "def Scope \"Looks\" {");
+        foreach (var kv in matToName)
+        {
+            var unityMat = kv.Key;
+            var usdName = kv.Value;
+            // Base color factor (URP/HDRP use _BaseColor)
+            Color baseColor = Color.white;
+            if (unityMat != null)
+            {
+                if (unityMat.HasProperty("_BaseColor")) baseColor = unityMat.GetColor("_BaseColor");
+                else if (unityMat.HasProperty("_Color")) baseColor = unityMat.color;
+            }
+            // Prepare texture files
+            string relTexBase = "assets";
+            EnsureDir(Path.Combine(lastExportDir ?? "", relTexBase));
+            string albedoRel = GetTextureRelativePathAny(unityMat, "_MainTex", "_BaseMap");
+            string normalRel = GetTextureRelativePath(unityMat, "_BumpMap");
+            string roughRel = GetTextureRelativePath(unityMat, "_RoughnessMap");
+            string metallicGlossRel = GetTextureRelativePath(unityMat, "_MetallicGlossMap");
+            float metallicScalar = 0f;
+            try { if (unityMat.HasProperty("_Metallic")) metallicScalar = unityMat.GetFloat("_Metallic"); } catch {}
+            bool useGlossAsRough = string.IsNullOrEmpty(roughRel) && !string.IsNullOrEmpty(metallicGlossRel);
+            // UV tiling/offset
+            Vector2 tiling = Vector2.one;
+            Vector2 offset = Vector2.zero;
+            try
+            {
+                if (unityMat.HasProperty("_MainTex")) { tiling = unityMat.GetTextureScale("_MainTex"); offset = unityMat.GetTextureOffset("_MainTex"); }
+                else if (unityMat.HasProperty("_BaseMap")) { tiling = unityMat.GetTextureScale("_BaseMap"); offset = unityMat.GetTextureOffset("_BaseMap"); }
+            }
+            catch {}
+            // Material type (only connect opacity for Transparent/Cutout)
+            string renderType = string.Empty;
+            try { renderType = unityMat.GetTag("RenderType", false, ""); } catch {}
+            bool isCutout = renderType == "TransparentCutout" || renderType == "AlphaTest" || (unityMat.shader != null && unityMat.shader.name.Contains("Cutout"));
+            bool isTransparent = renderType == "Transparent" || unityMat.renderQueue >= 3000;
+            sw.WriteLine(ind1 + "def Material \"" + usdName + "\" {");
+            sw.WriteLine(ind2 + "token outputs:surface.connect = </World/Looks/" + usdName + "/PreviewSurface.outputs:surface>");
+            // Primvar st
+            sw.WriteLine(ind2 + "def Shader \"Primvar_st\" {");
+            sw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+            sw.WriteLine(ind2 + "    uniform token info:id = \"UsdPrimvarReader_float2\"");
+            sw.WriteLine(ind2 + "    string inputs:varname = \"st\"");
+            sw.WriteLine(ind2 + "    float2 outputs:result");
+            sw.WriteLine(ind2 + "}");
+            // UV Transform (tiling, offset)
+            sw.WriteLine(ind2 + "def Shader \"UVTransform\" {");
+            sw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+            sw.WriteLine(ind2 + "    uniform token info:id = \"UsdTransform2d\"");
+            sw.WriteLine(ind2 + "    float2 inputs:in.connect = </World/Looks/" + usdName + "/Primvar_st.outputs:result>");
+            sw.WriteLine(ind2 + "    float inputs:rotation = 0");
+            sw.WriteLine(ind2 + "    float2 inputs:scale = (" + FormatFloat(tiling.x) + ", " + FormatFloat(tiling.y) + ")");
+            sw.WriteLine(ind2 + "    float2 inputs:translation = (" + FormatFloat(offset.x) + ", " + FormatFloat(offset.y) + ")");
+            sw.WriteLine(ind2 + "    float2 outputs:result");
+            sw.WriteLine(ind2 + "}");
+            // Albedo texture
+            if (!string.IsNullOrEmpty(albedoRel))
+            {
+                sw.WriteLine(ind2 + "def Shader \"AlbedoTex\" {");
+                sw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+                sw.WriteLine(ind2 + "    uniform token info:id = \"UsdUVTexture\"");
+                sw.WriteLine(ind2 + "    asset inputs:file = @" + albedoRel + "@");
+                sw.WriteLine(ind2 + "    token inputs:sourceColorSpace = \"sRGB\"");
+                sw.WriteLine(ind2 + "    float2 inputs:st.connect = </World/Looks/" + usdName + "/UVTransform.outputs:result>");
+                sw.WriteLine(ind2 + "    token inputs:wrapS = \"repeat\"");
+                sw.WriteLine(ind2 + "    token inputs:wrapT = \"repeat\"");
+                // Multiply by base color factor
+                sw.WriteLine(ind2 + "    float3 inputs:scale = (" + FormatFloat(baseColor.r) + ", " + FormatFloat(baseColor.g) + ", " + FormatFloat(baseColor.b) + ")");
+                sw.WriteLine(ind2 + "    float3 outputs:rgb");
+                sw.WriteLine(ind2 + "    float outputs:a");
+                sw.WriteLine(ind2 + "}");
+            }
+            // Normal texture
+            if (!string.IsNullOrEmpty(normalRel))
+            {
+                sw.WriteLine(ind2 + "def Shader \"NormalTex\" {");
+                sw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+                sw.WriteLine(ind2 + "    uniform token info:id = \"UsdUVTexture\"");
+                sw.WriteLine(ind2 + "    asset inputs:file = @" + normalRel + "@");
+                sw.WriteLine(ind2 + "    token inputs:sourceColorSpace = \"raw\"");
+                sw.WriteLine(ind2 + "    float2 inputs:st.connect = </World/Looks/" + usdName + "/UVTransform.outputs:result>");
+                sw.WriteLine(ind2 + "    float3 inputs:scale = (2, 2, 2)");
+                sw.WriteLine(ind2 + "    float3 inputs:bias = (-1, -1, -1)");
+                sw.WriteLine(ind2 + "    token inputs:wrapS = \"repeat\"");
+                sw.WriteLine(ind2 + "    token inputs:wrapT = \"repeat\"");
+                sw.WriteLine(ind2 + "    float3 outputs:rgb");
+                sw.WriteLine(ind2 + "}");
+            }
+            // Roughness texture
+            if (!string.IsNullOrEmpty(roughRel) || useGlossAsRough)
+            {
+                sw.WriteLine(ind2 + "def Shader \"RoughnessTex\" {");
+                sw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+                sw.WriteLine(ind2 + "    uniform token info:id = \"UsdUVTexture\"");
+                sw.WriteLine(ind2 + "    asset inputs:file = @" + (useGlossAsRough ? metallicGlossRel : roughRel) + "@");
+                sw.WriteLine(ind2 + "    token inputs:sourceColorSpace = \"raw\"");
+                sw.WriteLine(ind2 + "    float2 inputs:st.connect = </World/Looks/" + usdName + "/UVTransform.outputs:result>");
+                sw.WriteLine(ind2 + "    token inputs:wrapS = \"repeat\"");
+                sw.WriteLine(ind2 + "    token inputs:wrapT = \"repeat\"");
+                if (useGlossAsRough)
+                {
+                    sw.WriteLine(ind2 + "    float inputs:scale = -1");
+                    sw.WriteLine(ind2 + "    float inputs:bias = 1");
+                    sw.WriteLine(ind2 + "    float outputs:a");
+                }
+                else
+                {
+                    sw.WriteLine(ind2 + "    float outputs:r");
+                }
+                sw.WriteLine(ind2 + "}");
+            }
+            // Metallic from MetallicGlossMap R channel (if present)
+            if (!string.IsNullOrEmpty(metallicGlossRel))
+            {
+                sw.WriteLine(ind2 + "def Shader \"MetallicTex\" {");
+                sw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+                sw.WriteLine(ind2 + "    uniform token info:id = \"UsdUVTexture\"");
+                sw.WriteLine(ind2 + "    asset inputs:file = @" + metallicGlossRel + "@");
+                sw.WriteLine(ind2 + "    token inputs:sourceColorSpace = \"raw\"");
+                sw.WriteLine(ind2 + "    float2 inputs:st.connect = </World/Looks/" + usdName + "/UVTransform.outputs:result>");
+                sw.WriteLine(ind2 + "    token inputs:wrapS = \"repeat\"");
+                sw.WriteLine(ind2 + "    token inputs:wrapT = \"repeat\"");
+                sw.WriteLine(ind2 + "    float outputs:r");
+                sw.WriteLine(ind2 + "}");
+            }
+            sw.WriteLine(ind2 + "def Shader \"PreviewSurface\" {");
+            sw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+            sw.WriteLine(ind2 + "    uniform token info:id = \"UsdPreviewSurface\"");
+            if (!string.IsNullOrEmpty(albedoRel))
+                sw.WriteLine(ind2 + "    color3f inputs:diffuseColor.connect = </World/Looks/" + usdName + "/AlbedoTex.outputs:rgb>");
+            else
+                sw.WriteLine(ind2 + "    color3f inputs:diffuseColor = (" + FormatFloat(baseColor.r) + ", " + FormatFloat(baseColor.g) + ", " + FormatFloat(baseColor.b) + ")");
+            if (!string.IsNullOrEmpty(albedoRel) && (isCutout || isTransparent))
+            {
+                sw.WriteLine(ind2 + "    float inputs:opacity.connect = </World/Looks/" + usdName + "/AlbedoTex.outputs:a>");
+                if (isCutout)
+                {
+                    float cutoff = 0.5f;
+                    if (unityMat.HasProperty("_Cutoff")) cutoff = unityMat.GetFloat("_Cutoff");
+                    sw.WriteLine(ind2 + "    float inputs:opacityThreshold = " + FormatFloat(cutoff));
+                }
+            }
+            if (!string.IsNullOrEmpty(normalRel))
+                sw.WriteLine(ind2 + "    normal3f inputs:normal.connect = </World/Looks/" + usdName + "/NormalTex.outputs:rgb>");
+            if (!string.IsNullOrEmpty(roughRel))
+                sw.WriteLine(ind2 + "    float inputs:roughness.connect = </World/Looks/" + usdName + "/RoughnessTex.outputs:r>");
+            else if (useGlossAsRough)
+                sw.WriteLine(ind2 + "    float inputs:roughness.connect = </World/Looks/" + usdName + "/RoughnessTex.outputs:a>");
+            else
+                sw.WriteLine(ind2 + "    float inputs:roughness = 0.5");
+            // Defaults inspired by reference scene
+            if (string.IsNullOrEmpty(albedoRel) || !(isCutout || isTransparent))
+                sw.WriteLine(ind2 + "    float inputs:opacity = 1");
+            sw.WriteLine(ind2 + "    float inputs:specular = 0.5");
+            sw.WriteLine(ind2 + "    float inputs:ior = 1.5");
+            if (!string.IsNullOrEmpty(metallicGlossRel))
+                sw.WriteLine(ind2 + "    float inputs:metallic.connect = </World/Looks/" + usdName + "/MetallicTex.outputs:r>");
+            else
+                sw.WriteLine(ind2 + "    float inputs:metallic = " + FormatFloat(metallicScalar));
+            sw.WriteLine(ind2 + "    token outputs:surface");
+            sw.WriteLine(ind2 + "}");
+            sw.WriteLine(ind1 + "}");
+        }
+        sw.WriteLine(ind0 + "}");
+        sw.WriteLine();
+    }
+
+    private void WriteMaterialsFile(string filePath, System.Collections.Generic.Dictionary<Material, string> matToName)
+    {
+        using (StreamWriter msw = new StreamWriter(filePath, false, new UTF8Encoding(false)))
+        {
+            msw.WriteLine("#usda 1.0");
+            msw.WriteLine();
+            msw.WriteLine("def Scope \"Looks\" {");
+            string ind1 = "    ";
+            string ind2 = ind1 + "    ";
+            foreach (var kv in matToName)
+            {
+                var unityMat = kv.Key;
+                var usdName = kv.Value;
+                // Base color factor
+                Color baseColor = Color.white;
+                if (unityMat != null)
+                {
+                    if (unityMat.HasProperty("_BaseColor")) baseColor = unityMat.GetColor("_BaseColor");
+                    else if (unityMat.HasProperty("_Color")) baseColor = unityMat.color;
+                }
+                // UV tiling/offset
+                Vector2 tiling = Vector2.one;
+                Vector2 offset = Vector2.zero;
+                try
+                {
+                    if (unityMat.HasProperty("_MainTex")) { tiling = unityMat.GetTextureScale("_MainTex"); offset = unityMat.GetTextureOffset("_MainTex"); }
+                    else if (unityMat.HasProperty("_BaseMap")) { tiling = unityMat.GetTextureScale("_BaseMap"); offset = unityMat.GetTextureOffset("_BaseMap"); }
+                }
+                catch {}
+                EnsureDir(Path.Combine(Path.GetDirectoryName(filePath) ?? "", "assets"));
+                string albedoRel = GetTextureRelativePathAny(unityMat, "_MainTex", "_BaseMap");
+                string normalRel = GetTextureRelativePath(unityMat, "_BumpMap");
+                string roughRel = GetTextureRelativePath(unityMat, "_RoughnessMap");
+                string metallicGlossRel = GetTextureRelativePath(unityMat, "_MetallicGlossMap");
+                float metallicScalar = 0f;
+                try { if (unityMat.HasProperty("_Metallic")) metallicScalar = unityMat.GetFloat("_Metallic"); } catch {}
+                bool useGlossAsRough = string.IsNullOrEmpty(roughRel) && !string.IsNullOrEmpty(metallicGlossRel);
+                // Material type
+                string renderType = string.Empty;
+                try { renderType = unityMat.GetTag("RenderType", false, ""); } catch {}
+                bool isCutout = renderType == "TransparentCutout" || renderType == "AlphaTest" || (unityMat.shader != null && unityMat.shader.name.Contains("Cutout"));
+                bool isTransparent = renderType == "Transparent" || unityMat.renderQueue >= 3000;
+                msw.WriteLine(ind1 + "def Material \"" + usdName + "\" {");
+                msw.WriteLine(ind2 + "token outputs:surface.connect = </Looks/" + usdName + "/PreviewSurface.outputs:surface>");
+                // Primvar st
+                msw.WriteLine(ind2 + "def Shader \"Primvar_st\" {");
+                msw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+                msw.WriteLine(ind2 + "    uniform token info:id = \"UsdPrimvarReader_float2\"");
+                msw.WriteLine(ind2 + "    string inputs:varname = \"st\"");
+                msw.WriteLine(ind2 + "    float2 outputs:result");
+                msw.WriteLine(ind2 + "}");
+                // UV Transform
+                msw.WriteLine(ind2 + "def Shader \"UVTransform\" {");
+                msw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+                msw.WriteLine(ind2 + "    uniform token info:id = \"UsdTransform2d\"");
+                msw.WriteLine(ind2 + "    float2 inputs:in.connect = </Looks/" + usdName + "/Primvar_st.outputs:result>");
+                msw.WriteLine(ind2 + "    float inputs:rotation = 0");
+                msw.WriteLine(ind2 + "    float2 inputs:scale = (" + FormatFloat(tiling.x) + ", " + FormatFloat(tiling.y) + ")");
+                msw.WriteLine(ind2 + "    float2 inputs:translation = (" + FormatFloat(offset.x) + ", " + FormatFloat(offset.y) + ")");
+                msw.WriteLine(ind2 + "    float2 outputs:result");
+                msw.WriteLine(ind2 + "}");
+                if (!string.IsNullOrEmpty(albedoRel))
+                {
+                    msw.WriteLine(ind2 + "def Shader \"AlbedoTex\" {");
+                    msw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+                    msw.WriteLine(ind2 + "    uniform token info:id = \"UsdUVTexture\"");
+                    msw.WriteLine(ind2 + "    asset inputs:file = @" + albedoRel + "@");
+                    msw.WriteLine(ind2 + "    token inputs:sourceColorSpace = \"sRGB\"");
+                    msw.WriteLine(ind2 + "    float2 inputs:st.connect = </Looks/" + usdName + "/UVTransform.outputs:result>");
+                    msw.WriteLine(ind2 + "    token inputs:wrapS = \"repeat\"");
+                    msw.WriteLine(ind2 + "    token inputs:wrapT = \"repeat\"");
+                    msw.WriteLine(ind2 + "    float3 inputs:scale = (" + FormatFloat(baseColor.r) + ", " + FormatFloat(baseColor.g) + ", " + FormatFloat(baseColor.b) + ")");
+                    msw.WriteLine(ind2 + "    float3 outputs:rgb");
+                    msw.WriteLine(ind2 + "    float outputs:a");
+                    msw.WriteLine(ind2 + "}");
+                }
+                if (!string.IsNullOrEmpty(normalRel))
+                {
+                    msw.WriteLine(ind2 + "def Shader \"NormalTex\" {");
+                    msw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+                    msw.WriteLine(ind2 + "    uniform token info:id = \"UsdUVTexture\"");
+                    msw.WriteLine(ind2 + "    asset inputs:file = @" + normalRel + "@");
+                    msw.WriteLine(ind2 + "    token inputs:sourceColorSpace = \"raw\"");
+                    msw.WriteLine(ind2 + "    float2 inputs:st.connect = </Looks/" + usdName + "/UVTransform.outputs:result>");
+                    msw.WriteLine(ind2 + "    float3 inputs:scale = (2, 2, 2)");
+                    msw.WriteLine(ind2 + "    float3 inputs:bias = (-1, -1, -1)");
+                    msw.WriteLine(ind2 + "    token inputs:wrapS = \"repeat\"");
+                    msw.WriteLine(ind2 + "    token inputs:wrapT = \"repeat\"");
+                    msw.WriteLine(ind2 + "    float3 outputs:rgb");
+                    msw.WriteLine(ind2 + "}");
+                }
+                if (!string.IsNullOrEmpty(roughRel) || useGlossAsRough)
+                {
+                    msw.WriteLine(ind2 + "def Shader \"RoughnessTex\" {");
+                    msw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+                    msw.WriteLine(ind2 + "    uniform token info:id = \"UsdUVTexture\"");
+                    msw.WriteLine(ind2 + "    asset inputs:file = @" + (useGlossAsRough ? metallicGlossRel : roughRel) + "@");
+                    msw.WriteLine(ind2 + "    token inputs:sourceColorSpace = \"raw\"");
+                    msw.WriteLine(ind2 + "    float2 inputs:st.connect = </Looks/" + usdName + "/UVTransform.outputs:result>");
+                    msw.WriteLine(ind2 + "    token inputs:wrapS = \"repeat\"");
+                    msw.WriteLine(ind2 + "    token inputs:wrapT = \"repeat\"");
+                    if (useGlossAsRough)
+                    {
+                        msw.WriteLine(ind2 + "    float inputs:scale = -1");
+                        msw.WriteLine(ind2 + "    float inputs:bias = 1");
+                        msw.WriteLine(ind2 + "    float outputs:a");
+                    }
+                    else
+                    {
+                        msw.WriteLine(ind2 + "    float outputs:r");
+                    }
+                    msw.WriteLine(ind2 + "}");
+                }
+                if (!string.IsNullOrEmpty(metallicGlossRel))
+                {
+                    msw.WriteLine(ind2 + "def Shader \"MetallicTex\" {");
+                    msw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+                    msw.WriteLine(ind2 + "    uniform token info:id = \"UsdUVTexture\"");
+                    msw.WriteLine(ind2 + "    asset inputs:file = @" + metallicGlossRel + "@");
+                    msw.WriteLine(ind2 + "    token inputs:sourceColorSpace = \"raw\"");
+                    msw.WriteLine(ind2 + "    float2 inputs:st.connect = </Looks/" + usdName + "/UVTransform.outputs:result>");
+                    msw.WriteLine(ind2 + "    token inputs:wrapS = \"repeat\"");
+                    msw.WriteLine(ind2 + "    token inputs:wrapT = \"repeat\"");
+                    msw.WriteLine(ind2 + "    float outputs:r");
+                    msw.WriteLine(ind2 + "}");
+                }
+                msw.WriteLine(ind2 + "def Shader \"PreviewSurface\" {");
+                msw.WriteLine(ind2 + "    uniform token info:implementationSource = \"id\"");
+                msw.WriteLine(ind2 + "    uniform token info:id = \"UsdPreviewSurface\"");
+                if (!string.IsNullOrEmpty(albedoRel))
+                    msw.WriteLine(ind2 + "    color3f inputs:diffuseColor.connect = </Looks/" + usdName + "/AlbedoTex.outputs:rgb>");
+                else
+                    msw.WriteLine(ind2 + "    color3f inputs:diffuseColor = (" + FormatFloat(baseColor.r) + ", " + FormatFloat(baseColor.g) + ", " + FormatFloat(baseColor.b) + ")");
+                if (!string.IsNullOrEmpty(albedoRel) && (isCutout || isTransparent))
+                {
+                    msw.WriteLine(ind2 + "    float inputs:opacity.connect = </Looks/" + usdName + "/AlbedoTex.outputs:a>");
+                    if (isCutout)
+                    {
+                        float cutoff = 0.5f;
+                        if (unityMat.HasProperty("_Cutoff")) cutoff = unityMat.GetFloat("_Cutoff");
+                        msw.WriteLine(ind2 + "    float inputs:opacityThreshold = " + FormatFloat(cutoff));
+                    }
+                }
+                if (!string.IsNullOrEmpty(normalRel))
+                    msw.WriteLine(ind2 + "    normal3f inputs:normal.connect = </Looks/" + usdName + "/NormalTex.outputs:rgb>");
+                if (!string.IsNullOrEmpty(roughRel))
+                    msw.WriteLine(ind2 + "    float inputs:roughness.connect = </Looks/" + usdName + "/RoughnessTex.outputs:r>");
+                else if (useGlossAsRough)
+                    msw.WriteLine(ind2 + "    float inputs:roughness.connect = </Looks/" + usdName + "/RoughnessTex.outputs:a>");
+                else
+                    msw.WriteLine(ind2 + "    float inputs:roughness = 0.5");
+                if (string.IsNullOrEmpty(albedoRel) || !(isCutout || isTransparent))
+                    msw.WriteLine(ind2 + "    float inputs:opacity = 1");
+                msw.WriteLine(ind2 + "    float inputs:specular = 0.5");
+                msw.WriteLine(ind2 + "    float inputs:ior = 1.5");
+                if (!string.IsNullOrEmpty(metallicGlossRel))
+                    msw.WriteLine(ind2 + "    float inputs:metallic.connect = </Looks/" + usdName + "/MetallicTex.outputs:r>");
+                else
+                    msw.WriteLine(ind2 + "    float inputs:metallic = " + FormatFloat(metallicScalar));
+                msw.WriteLine(ind2 + "    token outputs:surface");
+                msw.WriteLine(ind2 + "}");
+                msw.WriteLine(ind1 + "}");
+            }
+            msw.WriteLine("}");
+        }
+    }
+
+    private void EnsureDir(string dir)
+    {
+        if (string.IsNullOrEmpty(dir)) return;
+        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+    }
+
+    private string GetTextureRelativePath(Material mat, string propName)
+    {
+        if (mat == null || !mat.HasProperty(propName)) return null;
+        var tex = mat.GetTexture(propName) as Texture2D;
+        if (tex == null) return null;
+        string src = AssetDatabase.GetAssetPath(tex);
+        if (string.IsNullOrEmpty(src) || !File.Exists(src))
+        {
+            Debug.LogWarning("Cannot locate source texture file for material property " + propName + ". Skipping.");
+            return null;
+        }
+        string fileName = Path.GetFileName(src);
+        string rel = Path.Combine("assets", fileName).Replace('\\', '/');
+        string dst = Path.Combine(lastExportDir ?? "", rel);
+        EnsureDir(Path.GetDirectoryName(dst));
+        try
+        {
+            File.Copy(src, dst, true);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning("Failed to copy texture to export assets: " + ex.Message);
+        }
+        return rel;
+    }
+
+    private string GetTextureRelativePathAny(Material mat, params string[] propNames)
+    {
+        if (mat == null || propNames == null) return null;
+        foreach (var p in propNames)
+        {
+            var r = GetTextureRelativePath(mat, p);
+            if (!string.IsNullOrEmpty(r)) return r;
+        }
+        return null;
     }
 }
 

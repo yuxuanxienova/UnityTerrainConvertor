@@ -1,8 +1,0 @@
-_BindContext
-_UnbindContext
-_CreateDefaultContext
-_CreateDefaultContextForAsset
-_CreateContextFromString
-_RefreshContext
-_GetCurrentContext
-_IsContextDependentPath

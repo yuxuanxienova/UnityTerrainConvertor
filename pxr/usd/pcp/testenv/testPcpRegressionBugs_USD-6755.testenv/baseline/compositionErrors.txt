@@ -1,5 +1,0 @@
-------------------------------------------------------------------------
-Errors while composing </C>
-
-Invalid reference offset SdfLayerOffset(0, 0) for @@</B> introduced by @root.usda@</C>. Using no offset instead.
-

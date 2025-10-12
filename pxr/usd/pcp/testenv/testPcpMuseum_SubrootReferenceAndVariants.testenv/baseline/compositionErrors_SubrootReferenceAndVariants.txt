@@ -1,5 +1,0 @@
-------------------------------------------------------------------------
-Errors while composing </InvalidSubrootRefWithVariantSelection>
-
-Invalid reference path </Group{v=x}Model> introduced by @SubrootReferenceAndVariants/root.usda@</InvalidSubrootRefWithVariantSelection>-- must be an absolute prim path with no variant selections.
-

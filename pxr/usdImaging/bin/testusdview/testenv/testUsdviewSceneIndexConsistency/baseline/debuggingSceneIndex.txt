@@ -1,1 +1,0 @@
-[HdsiDebuggingSceneIndex] Instantiated for 'HdDependencyForwardingSceneIndex' of type 'HdSceneIndexBase*'.

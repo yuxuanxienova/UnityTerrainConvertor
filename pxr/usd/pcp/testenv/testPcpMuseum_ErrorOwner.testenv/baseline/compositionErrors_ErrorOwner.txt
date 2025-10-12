@@ -1,5 +1,0 @@
-------------------------------------------------------------------------
-Errors while computing Layer Stack
-
-The following sublayers for layer @ErrorOwner/root.usda@ have the same owner 'foo': @ErrorOwner/stronger.usda@, @ErrorOwner/owned.usda@
-

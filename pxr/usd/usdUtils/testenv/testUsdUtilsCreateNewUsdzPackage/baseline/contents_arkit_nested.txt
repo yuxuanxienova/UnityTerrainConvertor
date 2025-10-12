@@ -1,2 +1,0 @@
-combined.usdc
-0/simpleMaterial.usdz

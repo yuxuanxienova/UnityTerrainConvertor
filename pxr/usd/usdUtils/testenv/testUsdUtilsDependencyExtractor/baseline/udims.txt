@@ -1,3 +1,0 @@
-udims/root.usda no sublayers
-udims/root.usda references[001]: ./test.<UDIM>.txt
-udims/root.usda no payloads

@@ -1,3 +1,0 @@
-usdzContextDepAssets.usda
-1.usdz
-2.usdz
