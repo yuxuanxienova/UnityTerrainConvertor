@@ -1,8 +1,8 @@
 #usda 1.0
 
 def Scope "Looks" {
-    def Material "Antique_Rustic_Mantel_Clock" {
-        token outputs:surface.connect = </Looks/Antique_Rustic_Mantel_Clock/PreviewSurface.outputs:surface>
+    def Material "Default_Material" {
+        token outputs:surface.connect = </Looks/Default_Material/PreviewSurface.outputs:surface>
         def Shader "Primvar_st" {
             uniform token info:implementationSource = "id"
             uniform token info:id = "UsdPrimvarReader_float2"
@@ -12,7 +12,36 @@ def Scope "Looks" {
         def Shader "UVTransform" {
             uniform token info:implementationSource = "id"
             uniform token info:id = "UsdTransform2d"
-            float2 inputs:in.connect = </Looks/Antique_Rustic_Mantel_Clock/Primvar_st.outputs:result>
+            float2 inputs:in.connect = </Looks/Default_Material/Primvar_st.outputs:result>
+            float inputs:rotation = 0
+            float2 inputs:scale = (1, 1)
+            float2 inputs:translation = (0, 0)
+            float2 outputs:result
+        }
+        def Shader "PreviewSurface" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdPreviewSurface"
+            color3f inputs:diffuseColor = (1, 1, 1)
+            float inputs:roughness = 0.5
+            float inputs:opacity = 1
+            float inputs:specular = 0.5
+            float inputs:ior = 1.5
+            float inputs:metallic = 0
+            token outputs:surface
+        }
+    }
+    def Material "Different_Prefabs" {
+        token outputs:surface.connect = </Looks/Different_Prefabs/PreviewSurface.outputs:surface>
+        def Shader "Primvar_st" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdPrimvarReader_float2"
+            string inputs:varname = "st"
+            float2 outputs:result
+        }
+        def Shader "UVTransform" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdTransform2d"
+            float2 inputs:in.connect = </Looks/Different_Prefabs/Primvar_st.outputs:result>
             float inputs:rotation = 0
             float2 inputs:scale = (1, 1)
             float2 inputs:translation = (0, 0)
@@ -21,9 +50,9 @@ def Scope "Looks" {
         def Shader "AlbedoTex" {
             uniform token info:implementationSource = "id"
             uniform token info:id = "UsdUVTexture"
-            asset inputs:file = @assets/Antique Square Mantel Clock Type C Wood02_AlbedoTransparency.jpg@
+            asset inputs:file = @assets/Different_prefabs_atlas_AlbedoTransparency.png@
             token inputs:sourceColorSpace = "sRGB"
-            float2 inputs:st.connect = </Looks/Antique_Rustic_Mantel_Clock/UVTransform.outputs:result>
+            float2 inputs:st.connect = </Looks/Different_Prefabs/UVTransform.outputs:result>
             token inputs:wrapS = "repeat"
             token inputs:wrapT = "repeat"
             float3 inputs:scale = (1, 1, 1)
@@ -33,25 +62,48 @@ def Scope "Looks" {
         def Shader "NormalTex" {
             uniform token info:implementationSource = "id"
             uniform token info:id = "UsdUVTexture"
-            asset inputs:file = @assets/Antique Square Mantel Clock Type C Wood02_Normal.jpg@
+            asset inputs:file = @assets/Different_prefabs_atlas_Normal.png@
             token inputs:sourceColorSpace = "raw"
-            float2 inputs:st.connect = </Looks/Antique_Rustic_Mantel_Clock/UVTransform.outputs:result>
+            float2 inputs:st.connect = </Looks/Different_Prefabs/UVTransform.outputs:result>
             float3 inputs:scale = (2, 2, 2)
             float3 inputs:bias = (-1, -1, -1)
             token inputs:wrapS = "repeat"
             token inputs:wrapT = "repeat"
             float3 outputs:rgb
         }
+        def Shader "RoughnessTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Different_prefabs_atlas_MetallicSmoothness.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Different_Prefabs/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float inputs:scale = -1
+            float inputs:bias = 1
+            float outputs:a
+        }
+        def Shader "MetallicTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Different_prefabs_atlas_MetallicSmoothness.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Different_Prefabs/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float outputs:r
+        }
         def Shader "PreviewSurface" {
             uniform token info:implementationSource = "id"
             uniform token info:id = "UsdPreviewSurface"
-            color3f inputs:diffuseColor.connect = </Looks/Antique_Rustic_Mantel_Clock/AlbedoTex.outputs:rgb>
-            normal3f inputs:normal.connect = </Looks/Antique_Rustic_Mantel_Clock/NormalTex.outputs:rgb>
-            float inputs:roughness = 0.5
-            float inputs:opacity = 1
+            color3f inputs:diffuseColor.connect = </Looks/Different_Prefabs/AlbedoTex.outputs:rgb>
+            float inputs:opacity.connect = </Looks/Different_Prefabs/AlbedoTex.outputs:a>
+            float inputs:opacityThreshold = 0.147
+            normal3f inputs:normal.connect = </Looks/Different_Prefabs/NormalTex.outputs:rgb>
+            float inputs:roughness.connect = </Looks/Different_Prefabs/RoughnessTex.outputs:a>
             float inputs:specular = 0.5
             float inputs:ior = 1.5
-            float inputs:metallic = 0
+            float inputs:metallic.connect = </Looks/Different_Prefabs/MetallicTex.outputs:r>
             token outputs:surface
         }
     }
