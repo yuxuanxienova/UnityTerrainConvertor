@@ -1,16 +1,18 @@
 # UnityTerrainConvertor
 
-> **Latest update:** 29&nbsp;April&nbsp;2025
+> **Latest update:** 13&nbsp;Oct&nbsp;2025
 
 ---
 
 ## Table of Contents  
-1. [Project Architecture](#project-architecture)  
-2. [One‑Click Mesh Combination](#1-one-click-mesh-combination)  
-3. [One‑Click Mesh Export → OBJ](#2-one-click-mesh-export-to-obj-file)  
-4. [One‑Click Waypoint Pair Export](#3-one-click-waypoint-pair-export)  
-5. [Isaac Gym `UnityTerrainModule`](#4-isaacgym-unityterrainmodule)  
-6. [Coordinate Alignment FAQ](#5-about-coordinate-alignment)
+ [Project Architecture](#project-architecture)  
+ 
+0. [FOR ISAAC LAB(new!): One-Click Mesh + texture export -> usda](#0-one-click-usda-export)  
+1. [FOR ISAAC GYM: One‑Click Mesh Combination](#1-one-click-mesh-combination)  
+2. [FOR ISAAC GYM: One‑Click Mesh Export → OBJ](#2-one-click-mesh-export-to-obj-file)  
+3. [FOR ISAAC GYM: One‑Click Waypoint Pair Export](#3-one-click-waypoint-pair-export)  
+4. [FOR ISAAC GYM: Isaac Gym `UnityTerrainModule`](#4-isaacgym-unityterrainmodule)  
+5. [FOR ISAAC GYM: Coordinate Alignment FAQ](#5-about-coordinate-alignment)
 
 ---
 
@@ -23,7 +25,7 @@
 │   │   ├── MeshCombiner          # 1‑click mesh combination
 │   │   ├── OBJExporter           # 1‑click OBJ export
 │   │   ├── ExportObjectPosition  # 1‑click waypoint export
-│   │   └── …
+│   │   └── USDAExporter          # 1-click usda export
 │   └── ExampleResources      # 🗺️  Sample data
 │       ├── map_v1                # Example map
 │       └── isaac_gym_files       # Example Isaac Gym terrains
@@ -31,6 +33,23 @@
 ```
 
 ---
+## 0. One-Click USDA Export
+1. **Select** the GameObject you want to export.  
+2. Click **`Tools → Export Selected to USDA`** and choose **_Export in ROS coordinate_** so the mesh aligns with Isaac Lab.  
+![Cube & terrain](images/image0_0.png)
+3. Export
+![Cube & terrain](images/image0_1.png)
+4. You will see output like that, copy ALL OF THEM to isaaclab, find a folder to past it
+
+![Cube & terrain](images/image0_3.png)
+
+5. Change the config in the environment to use this scene
+
+![Cube & terrain](images/image0_4.png)
+
+6. Start the isaaclab training, you can see exactly the same scene
+
+![Cube & terrain](images/image0_5.png)
 
 ## 1. One‑Click Mesh Combination
 > **No more exporting & re‑importing terrains!**
