@@ -1,6 +1,387 @@
 #usda 1.0
 
 def Scope "Looks" {
+    def Material "Old_Rust_Car" {
+        token outputs:surface.connect = </Looks/Old_Rust_Car/PreviewSurface.outputs:surface>
+        def Shader "Primvar_st" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdPrimvarReader_float2"
+            string inputs:varname = "st"
+            float2 outputs:result
+        }
+        def Shader "UVTransform" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdTransform2d"
+            float2 inputs:in.connect = </Looks/Old_Rust_Car/Primvar_st.outputs:result>
+            float inputs:rotation = 0
+            float2 inputs:scale = (1, 1)
+            float2 inputs:translation = (0, 0)
+            float2 outputs:result
+        }
+        def Shader "AlbedoTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Old_Rust_Car_AlbedoTransparency.png@
+            token inputs:sourceColorSpace = "sRGB"
+            float2 inputs:st.connect = </Looks/Old_Rust_Car/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float3 inputs:scale = (1, 1, 1)
+            float3 outputs:rgb
+            float outputs:a
+        }
+        def Shader "NormalTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Old_Rust_Car_Normal.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Old_Rust_Car/UVTransform.outputs:result>
+            float3 inputs:scale = (2, 2, 2)
+            float3 inputs:bias = (-1, -1, -1)
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float3 outputs:rgb
+        }
+        def Shader "RoughnessTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Old_Rust_Car_MetallicSmoothness.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Old_Rust_Car/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float inputs:scale = -1
+            float inputs:bias = 1
+            float outputs:a
+        }
+        def Shader "MetallicTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Old_Rust_Car_MetallicSmoothness.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Old_Rust_Car/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float outputs:r
+        }
+        def Shader "PreviewSurface" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdPreviewSurface"
+            color3f inputs:diffuseColor.connect = </Looks/Old_Rust_Car/AlbedoTex.outputs:rgb>
+            float inputs:opacity.connect = </Looks/Old_Rust_Car/AlbedoTex.outputs:a>
+            float inputs:opacityThreshold = 0.754
+            normal3f inputs:normal.connect = </Looks/Old_Rust_Car/NormalTex.outputs:rgb>
+            float inputs:roughness.connect = </Looks/Old_Rust_Car/RoughnessTex.outputs:a>
+            float inputs:specular = 0.5
+            float inputs:ior = 1.5
+            float inputs:metallic.connect = </Looks/Old_Rust_Car/MetallicTex.outputs:r>
+            token outputs:surface
+        }
+    }
+    def Material "Petrol_pump" {
+        token outputs:surface.connect = </Looks/Petrol_pump/PreviewSurface.outputs:surface>
+        def Shader "Primvar_st" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdPrimvarReader_float2"
+            string inputs:varname = "st"
+            float2 outputs:result
+        }
+        def Shader "UVTransform" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdTransform2d"
+            float2 inputs:in.connect = </Looks/Petrol_pump/Primvar_st.outputs:result>
+            float inputs:rotation = 0
+            float2 inputs:scale = (1, 1)
+            float2 inputs:translation = (0, 0)
+            float2 outputs:result
+        }
+        def Shader "AlbedoTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Petrol_pump_AlbedoTransparency.png@
+            token inputs:sourceColorSpace = "sRGB"
+            float2 inputs:st.connect = </Looks/Petrol_pump/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float3 inputs:scale = (1, 1, 1)
+            float3 outputs:rgb
+            float outputs:a
+        }
+        def Shader "NormalTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Petrol_pump_Normal.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Petrol_pump/UVTransform.outputs:result>
+            float3 inputs:scale = (2, 2, 2)
+            float3 inputs:bias = (-1, -1, -1)
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float3 outputs:rgb
+        }
+        def Shader "RoughnessTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Petrol_pump_MetallicSmoothness.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Petrol_pump/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float inputs:scale = -1
+            float inputs:bias = 1
+            float outputs:a
+        }
+        def Shader "MetallicTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Petrol_pump_MetallicSmoothness.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Petrol_pump/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float outputs:r
+        }
+        def Shader "PreviewSurface" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdPreviewSurface"
+            color3f inputs:diffuseColor.connect = </Looks/Petrol_pump/AlbedoTex.outputs:rgb>
+            normal3f inputs:normal.connect = </Looks/Petrol_pump/NormalTex.outputs:rgb>
+            float inputs:roughness.connect = </Looks/Petrol_pump/RoughnessTex.outputs:a>
+            float inputs:opacity = 1
+            float inputs:specular = 0.5
+            float inputs:ior = 1.5
+            float inputs:metallic.connect = </Looks/Petrol_pump/MetallicTex.outputs:r>
+            token outputs:surface
+        }
+    }
+    def Material "Petrol_pump_Transparent" {
+        token outputs:surface.connect = </Looks/Petrol_pump_Transparent/PreviewSurface.outputs:surface>
+        def Shader "Primvar_st" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdPrimvarReader_float2"
+            string inputs:varname = "st"
+            float2 outputs:result
+        }
+        def Shader "UVTransform" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdTransform2d"
+            float2 inputs:in.connect = </Looks/Petrol_pump_Transparent/Primvar_st.outputs:result>
+            float inputs:rotation = 0
+            float2 inputs:scale = (1, 1)
+            float2 inputs:translation = (0, 0)
+            float2 outputs:result
+        }
+        def Shader "AlbedoTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Petrol_pump_AlbedoTransparency.png@
+            token inputs:sourceColorSpace = "sRGB"
+            float2 inputs:st.connect = </Looks/Petrol_pump_Transparent/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float3 inputs:scale = (1, 1, 1)
+            float3 outputs:rgb
+            float outputs:a
+        }
+        def Shader "NormalTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Petrol_pump_Normal.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Petrol_pump_Transparent/UVTransform.outputs:result>
+            float3 inputs:scale = (2, 2, 2)
+            float3 inputs:bias = (-1, -1, -1)
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float3 outputs:rgb
+        }
+        def Shader "RoughnessTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Petrol_pump_MetallicSmoothness.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Petrol_pump_Transparent/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float inputs:scale = -1
+            float inputs:bias = 1
+            float outputs:a
+        }
+        def Shader "MetallicTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Petrol_pump_MetallicSmoothness.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Petrol_pump_Transparent/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float outputs:r
+        }
+        def Shader "PreviewSurface" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdPreviewSurface"
+            color3f inputs:diffuseColor.connect = </Looks/Petrol_pump_Transparent/AlbedoTex.outputs:rgb>
+            float inputs:opacity.connect = </Looks/Petrol_pump_Transparent/AlbedoTex.outputs:a>
+            normal3f inputs:normal.connect = </Looks/Petrol_pump_Transparent/NormalTex.outputs:rgb>
+            float inputs:roughness.connect = </Looks/Petrol_pump_Transparent/RoughnessTex.outputs:a>
+            float inputs:specular = 0.5
+            float inputs:ior = 1.5
+            float inputs:metallic.connect = </Looks/Petrol_pump_Transparent/MetallicTex.outputs:r>
+            token outputs:surface
+        }
+    }
+    def Material "Station_Canopy" {
+        token outputs:surface.connect = </Looks/Station_Canopy/PreviewSurface.outputs:surface>
+        def Shader "Primvar_st" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdPrimvarReader_float2"
+            string inputs:varname = "st"
+            float2 outputs:result
+        }
+        def Shader "UVTransform" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdTransform2d"
+            float2 inputs:in.connect = </Looks/Station_Canopy/Primvar_st.outputs:result>
+            float inputs:rotation = 0
+            float2 inputs:scale = (1, 1)
+            float2 inputs:translation = (0, 0)
+            float2 outputs:result
+        }
+        def Shader "AlbedoTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Station_Canopy_AlbedoTransparency.png@
+            token inputs:sourceColorSpace = "sRGB"
+            float2 inputs:st.connect = </Looks/Station_Canopy/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float3 inputs:scale = (1, 1, 1)
+            float3 outputs:rgb
+            float outputs:a
+        }
+        def Shader "NormalTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Station_Canopy_Normal.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Station_Canopy/UVTransform.outputs:result>
+            float3 inputs:scale = (2, 2, 2)
+            float3 inputs:bias = (-1, -1, -1)
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float3 outputs:rgb
+        }
+        def Shader "RoughnessTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Station_Canopy_MetallicSmoothness.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Station_Canopy/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float inputs:scale = -1
+            float inputs:bias = 1
+            float outputs:a
+        }
+        def Shader "MetallicTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Station_Canopy_MetallicSmoothness.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Station_Canopy/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float outputs:r
+        }
+        def Shader "PreviewSurface" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdPreviewSurface"
+            color3f inputs:diffuseColor.connect = </Looks/Station_Canopy/AlbedoTex.outputs:rgb>
+            normal3f inputs:normal.connect = </Looks/Station_Canopy/NormalTex.outputs:rgb>
+            float inputs:roughness.connect = </Looks/Station_Canopy/RoughnessTex.outputs:a>
+            float inputs:opacity = 1
+            float inputs:specular = 0.5
+            float inputs:ior = 1.5
+            float inputs:metallic.connect = </Looks/Station_Canopy/MetallicTex.outputs:r>
+            token outputs:surface
+        }
+    }
+    def Material "Gas_Cistern" {
+        token outputs:surface.connect = </Looks/Gas_Cistern/PreviewSurface.outputs:surface>
+        def Shader "Primvar_st" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdPrimvarReader_float2"
+            string inputs:varname = "st"
+            float2 outputs:result
+        }
+        def Shader "UVTransform" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdTransform2d"
+            float2 inputs:in.connect = </Looks/Gas_Cistern/Primvar_st.outputs:result>
+            float inputs:rotation = 0
+            float2 inputs:scale = (1, 1)
+            float2 inputs:translation = (0, 0)
+            float2 outputs:result
+        }
+        def Shader "AlbedoTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Gas Cistern_AlbedoTransparency.png@
+            token inputs:sourceColorSpace = "sRGB"
+            float2 inputs:st.connect = </Looks/Gas_Cistern/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float3 inputs:scale = (1, 1, 1)
+            float3 outputs:rgb
+            float outputs:a
+        }
+        def Shader "NormalTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Gas Cistern_Normal.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Gas_Cistern/UVTransform.outputs:result>
+            float3 inputs:scale = (2, 2, 2)
+            float3 inputs:bias = (-1, -1, -1)
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float3 outputs:rgb
+        }
+        def Shader "RoughnessTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Gas Cistern_MetallicSmoothness.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Gas_Cistern/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float inputs:scale = -1
+            float inputs:bias = 1
+            float outputs:a
+        }
+        def Shader "MetallicTex" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdUVTexture"
+            asset inputs:file = @assets/Gas Cistern_MetallicSmoothness.png@
+            token inputs:sourceColorSpace = "raw"
+            float2 inputs:st.connect = </Looks/Gas_Cistern/UVTransform.outputs:result>
+            token inputs:wrapS = "repeat"
+            token inputs:wrapT = "repeat"
+            float outputs:r
+        }
+        def Shader "PreviewSurface" {
+            uniform token info:implementationSource = "id"
+            uniform token info:id = "UsdPreviewSurface"
+            color3f inputs:diffuseColor.connect = </Looks/Gas_Cistern/AlbedoTex.outputs:rgb>
+            normal3f inputs:normal.connect = </Looks/Gas_Cistern/NormalTex.outputs:rgb>
+            float inputs:roughness.connect = </Looks/Gas_Cistern/RoughnessTex.outputs:a>
+            float inputs:opacity = 1
+            float inputs:specular = 0.5
+            float inputs:ior = 1.5
+            float inputs:metallic.connect = </Looks/Gas_Cistern/MetallicTex.outputs:r>
+            token outputs:surface
+        }
+    }
     def Material "Default_Material" {
         token outputs:surface.connect = </Looks/Default_Material/PreviewSurface.outputs:surface>
         def Shader "Primvar_st" {
