@@ -288,82 +288,100 @@ public class USDAExporter : EditorWindow
         sw.WriteLine(ind0 + ")");
         sw.WriteLine(ind0 + "{");
 
-        // extent
-        sw.WriteLine(ind1 + "uniform float3[] extent = [");
-        sw.WriteLine(ind2 + "(" + FormatFloat(minExtent.x) + ", " + FormatFloat(minExtent.y) + ", " + FormatFloat(minExtent.z) + "),");
-        sw.WriteLine(ind2 + "(" + FormatFloat(maxExtent.x) + ", " + FormatFloat(maxExtent.y) + ", " + FormatFloat(maxExtent.z) + ")");
-        sw.WriteLine(ind1 + "]");
+        // doubleSided first (match fixed file ordering)
+        sw.WriteLine(ind1 + "uniform bool doubleSided = 1");
 
-        // points
-        sw.WriteLine(ind1 + "point3f[] points = [");
-        for (int i = 0; i < points.Length; i++)
+        // extent single-line
+        sw.WriteLine(ind1 + "uniform float3[] extent = [(" +
+            FormatFloat(minExtent.x) + ", " + FormatFloat(minExtent.y) + ", " + FormatFloat(minExtent.z) + "), (" +
+            FormatFloat(maxExtent.x) + ", " + FormatFloat(maxExtent.y) + ", " + FormatFloat(maxExtent.z) + ")] ");
+
+        // face counts single-line
         {
-            Vector3 p = points[i];
-            string suffix = (i == points.Length - 1) ? string.Empty : ",";
-            sw.WriteLine(ind2 + "(" + FormatFloat(p.x) + ", " + FormatFloat(p.y) + ", " + FormatFloat(p.z) + ")" + suffix);
-        }
-        sw.WriteLine(ind1 + "]");
-
-        // face counts
-        sw.WriteLine(ind1 + "int[] faceVertexCounts = [");
-        for (int i = 0; i < faceCounts.Length; i++)
-        {
-            string suffix = (i == faceCounts.Length - 1) ? string.Empty : ",";
-            sw.WriteLine(ind2 + faceCounts[i] + suffix);
-        }
-        sw.WriteLine(ind1 + "]");
-
-        // face indices
-        sw.WriteLine(ind1 + "int[] faceVertexIndices = [");
-        for (int i = 0; i < faceIndices.Length; i++)
-        {
-            string suffix = (i == faceIndices.Length - 1) ? string.Empty : ",";
-            sw.WriteLine(ind2 + faceIndices[i] + suffix);
-        }
-        sw.WriteLine(ind1 + "]");
-
-        // Physics collision attributes (enabled and mesh approximation)
-        // (write these once using final values)
-
-        // normals (vertex interpolation)
-        if (outNormals != null)
-        {
-            sw.WriteLine(ind1 + "normal3f[] normals = [");
-            for (int i = 0; i < outNormals.Length; i++)
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.Append(ind1).Append("int[] faceVertexCounts = [");
+            for (int i = 0; i < faceCounts.Length; i++)
             {
-                Vector3 n = outNormals[i];
-                string suffix = (i == outNormals.Length - 1) ? string.Empty : ",";
-                sw.WriteLine(ind2 + "(" + FormatFloat(n.x) + ", " + FormatFloat(n.y) + ", " + FormatFloat(n.z) + ")" + suffix);
+                if (i > 0) sb.Append(", ");
+                sb.Append(faceCounts[i]);
             }
-            sw.WriteLine(ind1 + "]");
-            sw.WriteLine(ind1 + "uniform token normals:interpolation = \"vertex\"");
+            sb.Append("]");
+            sw.WriteLine(sb.ToString());
         }
 
-        // UVs as primvar st (faceVarying to match reference behavior)
-        if (outUvs != null)
+        // face indices single-line
         {
-            sw.WriteLine(ind1 + "texCoord2f[] primvars:st = [");
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.Append(ind1).Append("int[] faceVertexIndices = [");
             for (int i = 0; i < faceIndices.Length; i++)
             {
-                Vector2 uv = outUvs[faceIndices[i]];
-                string suffix = (i == faceIndices.Length - 1) ? string.Empty : ",";
-                sw.WriteLine(ind2 + "(" + FormatFloat(uv.x) + ", " + FormatFloat(uv.y) + ")" + suffix);
+                if (i > 0) sb.Append(", ");
+                sb.Append(faceIndices[i]);
             }
-            sw.WriteLine(ind1 + "]");
-            sw.WriteLine(ind1 + "uniform token primvars:st:interpolation = \"faceVarying\"");
+            sb.Append("]");
+            sw.WriteLine(sb.ToString());
         }
 
-        // material binding (visual)
+        // material binding (visual) before normals
         if (!string.IsNullOrEmpty(materialBindingPath))
         {
             sw.WriteLine(ind1 + "rel material:binding = <" + materialBindingPath + ">");
         }
 
-        // Physics collision attributes (enabled and mesh approximation)
-        sw.WriteLine(ind1 + "bool physics:collisionEnabled = 1");
+        // normals single-line (vertex interpolation)
+        if (outNormals != null)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.Append(ind1).Append("normal3f[] normals = [");
+            for (int i = 0; i < outNormals.Length; i++)
+            {
+                if (i > 0) sb.Append(", ");
+                Vector3 n = outNormals[i];
+                sb.Append("(").Append(FormatFloat(n.x)).Append(", ").Append(FormatFloat(n.y)).Append(", ").Append(FormatFloat(n.z)).Append(")");
+            }
+            sb.Append("]");
+            sw.WriteLine(sb.ToString());
+            sw.WriteLine(ind1 + "uniform token normals:interpolation = \"vertex\"");
+        }
+
+        // physics flags
         sw.WriteLine(ind1 + "uniform token physics:approximation = \"none\"");
+        sw.WriteLine(ind1 + "bool physics:collisionEnabled = 1");
+
+        // points single-line
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.Append(ind1).Append("point3f[] points = [");
+            for (int i = 0; i < points.Length; i++)
+            {
+                if (i > 0) sb.Append(", ");
+                Vector3 p = points[i];
+                sb.Append("(").Append(FormatFloat(p.x)).Append(", ").Append(FormatFloat(p.y)).Append(", ").Append(FormatFloat(p.z)).Append(")");
+            }
+            sb.Append("]");
+            sw.WriteLine(sb.ToString());
+        }
+
+        // UVs as primvar st (faceVarying) single-line
+        if (outUvs != null)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.Append(ind1).Append("texCoord2f[] primvars:st = [");
+            for (int i = 0; i < faceIndices.Length; i++)
+            {
+                if (i > 0) sb.Append(", ");
+                Vector2 uv = outUvs[faceIndices[i]];
+                sb.Append("(").Append(FormatFloat(uv.x)).Append(", ").Append(FormatFloat(uv.y)).Append(")");
+            }
+            sb.Append("] (");
+            sb.Append("\n").Append(ind2).Append("interpolation = \"faceVarying\"");
+            sb.Append("\n").Append(ind1).Append(")");
+            sw.WriteLine(sb.ToString());
+            sw.WriteLine(ind1 + "uniform token primvars:st:interpolation = \"faceVarying\"");
+        }
+
+        // no subdivision
         sw.WriteLine(ind1 + "uniform token subdivisionScheme = \"none\"");
-        sw.WriteLine(ind1 + "uniform bool doubleSided = 1");
 
         sw.WriteLine(ind0 + "}");
     }
