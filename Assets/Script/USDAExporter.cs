@@ -8,8 +8,8 @@ using System.Text;
 
 public class USDAExporter : EditorWindow
 {
-    private bool exportInROSCoordinateFrame = false;
-    private bool exportMaterialsSeparately = false;
+    private bool exportInROSCoordinateFrame = true;
+    private bool exportMaterialsSeparately = true;
     private string lastExportDir = null;
 
     [MenuItem("Tools/Export Selected to USDA")]
