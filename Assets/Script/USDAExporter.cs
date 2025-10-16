@@ -12,6 +12,25 @@ public class USDAExporter : EditorWindow
     private bool exportMaterialsSeparately = true;
     private string lastExportDir = null;
 
+    // Programmatic API: Export a specific GameObject to USDA with defaults matching the window
+    public static bool ExportGameObjectToUSDA(GameObject root, string path, bool rosCoordinate = true, bool materialsSeparately = true)
+    {
+        if (root == null) { Debug.LogError("USDA export failed: root GameObject is null."); return false; }
+        if (string.IsNullOrEmpty(path)) { Debug.LogError("USDA export failed: output path is empty."); return false; }
+
+        var exporter = ScriptableObject.CreateInstance<USDAExporter>();
+        exporter.exportInROSCoordinateFrame = rosCoordinate;
+        exporter.exportMaterialsSeparately = materialsSeparately;
+        try
+        {
+            return exporter.ExportGameObjectToUSDA_Internal(root, path);
+        }
+        finally
+        {
+            DestroyImmediate(exporter);
+        }
+    }
+
     [MenuItem("Tools/Export Selected to USDA")]
     static void Init()
     {
@@ -115,6 +134,83 @@ public class USDAExporter : EditorWindow
         catch (System.Exception ex)
         {
             Debug.LogError("Error exporting USDA: " + ex.Message);
+        }
+        finally
+        {
+            EditorUtility.ClearProgressBar();
+        }
+    }
+
+    // Instance helper used by the static API (no dialogs, exact default behavior)
+    private bool ExportGameObjectToUSDA_Internal(GameObject selected, string path)
+    {
+        // Ensure culture formatting with '.' for decimals
+        CultureInfo cultureInfo = new CultureInfo("en-US");
+        System.Threading.Thread.CurrentThread.CurrentCulture = cultureInfo;
+
+        try
+        {
+            using (StreamWriter sw = new StreamWriter(path, false, new UTF8Encoding(false)))
+            {
+                lastExportDir = Path.GetDirectoryName(path);
+                var nodes = new System.Collections.Generic.List<(Transform tr, Mesh mesh, Renderer renderer)>();
+                var matToName = new System.Collections.Generic.Dictionary<Material, string>();
+                CollectHierarchyMeshesAndMaterials(selected.transform, nodes, matToName);
+
+                string materialsPath = null;
+                if (matToName.Count > 0 && exportMaterialsSeparately)
+                {
+                    string dir = lastExportDir;
+                    string baseName = Path.GetFileNameWithoutExtension(path);
+                    materialsPath = Path.Combine(dir, baseName + "_Looks.usda");
+                    WriteMaterialsFile(materialsPath, matToName);
+                }
+
+                WriteUsdHeader(sw);
+
+                // Looks scope (inline or reference)
+                if (matToName.Count > 0)
+                {
+                    if (exportMaterialsSeparately)
+                    {
+                        string ind0 = "    ";
+                        sw.WriteLine(ind0 + "def Scope \"Looks\" (");
+                        sw.WriteLine(ind0 + "    references = @" + Path.GetFileName(materialsPath) + "@</Looks>");
+                        sw.WriteLine(ind0 + ")");
+                        sw.WriteLine(ind0 + "{");
+                        sw.WriteLine(ind0 + "}");
+                        sw.WriteLine();
+                    }
+                    else
+                    {
+                        WriteMaterialsInline(sw, matToName, "    ");
+                    }
+                }
+
+                // Meshes with bindings
+                foreach (var node in nodes)
+                {
+                    string primName = MakePrimNameFromPath(node.tr, selected.transform);
+                    string binding = null;
+                    if (node.renderer != null)
+                    {
+                        var um = node.renderer.sharedMaterial;
+                        if (um != null && matToName.TryGetValue(um, out var matName))
+                            binding = "/World/Looks/" + matName;
+                    }
+                    WriteMeshPrim(sw, primName, node.mesh, "    ", node.tr, binding);
+                }
+
+                WriteWorldFooter(sw);
+            }
+
+            Debug.Log("Exported USDA to " + path);
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError("Error exporting USDA: " + ex.Message);
+            return false;
         }
         finally
         {

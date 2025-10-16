@@ -12,6 +12,44 @@ public class ExportObjectPositions : EditorWindow
     private string fileName = "point_set_1.txt";
     private string childTag = "way_point";  // New field to specify the tag for child objects
 
+    // Programmatic API: export all children with given tag under a parent GameObject
+    public static bool ExportWaypoints(GameObject parent, string tag, string path, bool rosCoordinate = true, bool includeParent = false)
+    {
+        if (parent == null) { Debug.LogError("Waypoint export failed: parent is null."); return false; }
+        if (string.IsNullOrEmpty(tag)) { Debug.LogError("Waypoint export failed: tag is empty."); return false; }
+        if (string.IsNullOrEmpty(path)) { Debug.LogError("Waypoint export failed: output path is empty."); return false; }
+
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("Object Positions Export");
+        sb.AppendLine("=======================");
+
+        List<GameObject> objectsToExport = new List<GameObject>();
+        if (includeParent) objectsToExport.Add(parent);
+        objectsToExport.AddRange(GetChildGameObjectsWithTag_Static(parent, tag));
+
+        foreach (GameObject go in objectsToExport)
+        {
+            Vector3 pos = go.transform.position;
+            if (rosCoordinate)
+            {
+                pos = ExtensionMethods.VecUnity2Ros(pos);
+            }
+            sb.AppendLine($"Object: {go.name}, Position: ({pos.x}, {pos.y}, {pos.z})");
+        }
+
+        try
+        {
+            File.WriteAllText(path, sb.ToString(), Encoding.UTF8);
+            AssetDatabase.Refresh();
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError("Failed to write waypoint file: " + ex.Message);
+            return false;
+        }
+    }
+
     [MenuItem("Tools/Export Object Positions…")]
     static void Init()
     {
@@ -156,6 +194,22 @@ public class ExportObjectPositions : EditorWindow
             result.AddRange(GetChildGameObjectsWithTag(child.gameObject, tag));
         }
 
+        return result;
+    }
+
+    // Static utility for programmatic API
+    private static List<GameObject> GetChildGameObjectsWithTag_Static(GameObject parent, string tag)
+    {
+        List<GameObject> result = new List<GameObject>();
+        if (parent == null) return result;
+        foreach (Transform child in parent.transform)
+        {
+            if (child.CompareTag(tag))
+            {
+                result.Add(child.gameObject);
+            }
+            result.AddRange(GetChildGameObjectsWithTag_Static(child.gameObject, tag));
+        }
         return result;
     }
 }
