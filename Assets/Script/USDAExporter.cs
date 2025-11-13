@@ -113,9 +113,17 @@ public class USDAExporter : EditorWindow
                 }
 
                 // Meshes with bindings
+                var usedPrimNames = new System.Collections.Generic.HashSet<string>();
                 foreach (var node in nodes)
                 {
-                    string primName = MakePrimNameFromPath(node.tr, selected.transform);
+                    string basePrimName = MakePrimNameFromPath(node.tr, selected.transform);
+                    string primName = basePrimName;
+                    int suffix = 1;
+                    while (!usedPrimNames.Add(primName))
+                    {
+                        primName = basePrimName + "_" + suffix.ToString();
+                        suffix++;
+                    }
                     string binding = null;
                     if (node.renderer != null)
                     {
@@ -188,9 +196,17 @@ public class USDAExporter : EditorWindow
                 }
 
                 // Meshes with bindings
+                var usedPrimNames = new System.Collections.Generic.HashSet<string>();
                 foreach (var node in nodes)
                 {
-                    string primName = MakePrimNameFromPath(node.tr, selected.transform);
+                    string basePrimName = MakePrimNameFromPath(node.tr, selected.transform);
+                    string primName = basePrimName;
+                    int suffix = 1;
+                    while (!usedPrimNames.Add(primName))
+                    {
+                        primName = basePrimName + "_" + suffix.ToString();
+                        suffix++;
+                    }
                     string binding = null;
                     if (node.renderer != null)
                     {
